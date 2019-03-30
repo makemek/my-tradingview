@@ -7,7 +7,7 @@ const env = process.env.NODE_ENV || 'development'
 
 module.exports = {
   mode: env,
-  entry: './src',
+  entry: './src/main.js',
   output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'bundle.js'
@@ -29,16 +29,24 @@ module.exports = {
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify(env)
     }),
-    new CopyWebpackPlugin([{
-      from: "manifest.json",
-      transform: function (content, path) {
-        // generates the manifest file using the package.json informations
-        return Buffer.from(JSON.stringify({
-          description: process.env.npm_package_description,
-          version: process.env.npm_package_version,
-          ...JSON.parse(content.toString())
-        }))
-      }
-    }], { copyUnmodified: true }),
+    new CopyWebpackPlugin(
+      [
+        {
+          from: "manifest.json",
+          transform: function (content, path) {
+            // generates the manifest file using the package.json informations
+            return Buffer.from(JSON.stringify({
+              description: process.env.npm_package_description,
+              version: process.env.npm_package_version,
+              ...JSON.parse(content.toString())
+            }))
+          }
+        },
+        {
+          from: 'src/context-injector.js',
+        }
+      ],
+      { copyUnmodified: true }
+    ),
   ]
 };

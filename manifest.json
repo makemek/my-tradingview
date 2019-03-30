@@ -3,12 +3,14 @@
   "name": "My Tradingview",
   "content_scripts": [
     {
+      "run_at": "document_start",
       "matches": [
         "https://www.tradingview.com/*"
       ],
       "js": [
-        "bundle.js"
+        "context-injector.js"
       ]
     }
-  ]
+  ],
+  "web_accessible_resources": ["bundle.js"]
 }
