@@ -20,7 +20,7 @@ module.exports = {
           }
       ]
   },
-  devtool: 'source-map',
+  devtool: env === 'production' ? undefined: 'eval',
   plugins: [
     new webpack.ProgressPlugin(),
     // clean the build folder
