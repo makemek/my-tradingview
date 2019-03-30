@@ -1,12 +1,23 @@
 {
   "name": "my-tradingview",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0",
+  "description": "my customized tradingview system",
   "main": "index.js",
   "scripts": {
+    "start": "webpack --watch",
+    "build": "NODE_ENV=production webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "babel-loader": "^8.0.5",
+    "clean-webpack-plugin": "^2.0.1",
+    "copy-webpack-plugin": "^5.0.2",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
 }
