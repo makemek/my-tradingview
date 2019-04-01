@@ -1,5 +1,14 @@
 {
   "presets": [
     ["@babel/preset-env"]
+  ],
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "root": ["./src"]
+      }
+    ],
+    "@babel/plugin-proposal-class-properties"
   ]
 }
