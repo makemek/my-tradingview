@@ -1,7 +1,8 @@
-import { txFilter, rxFilter } from 'modules/event-hook/filter'
+import debug from 'debug'
+
+const log = debug(`${process.env.APP_NAME}:socket:hooker`)
 
 export default class SocketMessageHooker extends WebSocket {
-
   static SOCKET_SEND = 'SEND'
   static SOCKET_RECEIVE = 'RECEIVE'
 
@@ -12,17 +13,23 @@ export default class SocketMessageHooker extends WebSocket {
   }
 
   send(message) {
-    if(!!this.onmessage && !this._alreadyWrapReceiveEvent) {
+    if (
+      !!this.onmessage &&
+      !this._alreadyWrapReceiveEvent
+    ) {
       this._wrapOnReceiveMessage(this.onmessage)
     }
-    console.log('send', message)
+    log('send', message)
     this._filter.apply(this.SOCKET_SEND, message)
     super.send(message)
   }
 
   receive(message) {
-    console.log('receive', message.data)
-    const processedMessage = this._filter.apply(this.SOCKET_RECEIVE, message.data)
+    log('receive', message.data)
+    const processedMessage = this._filter.apply(
+      this.SOCKET_RECEIVE,
+      message.data,
+    )
     return { ...message, data: processedMessage }
   }
 

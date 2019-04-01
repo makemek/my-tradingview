@@ -6,7 +6,22 @@
   "scripts": {
     "start": "webpack --watch",
     "build": "NODE_ENV=production webpack",
-    "test": "jest"
+    "test": "jest",
+    "pretty": "prettier --write 'src/**/*.js'",
+    "lint": "eslint --fix src/**/*.js",
+    "lint:staged": "lint-staged"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged && lint-staged && npm run test -- -b",
+      "pre-push": "pretty-quick --staged && lint-staged && npm run test -- -b"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -15,11 +30,20 @@
     "@babel/core": "^7.4.0",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/preset-env": "^7.4.2",
+    "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
     "babel-plugin-module-resolver": "^3.2.0",
     "clean-webpack-plugin": "^2.0.1",
     "copy-webpack-plugin": "^5.0.2",
+    "debug": "^4.1.1",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "husky": "^1.3.1",
     "jest": "^24.5.0",
+    "lint-staged": "^8.1.5",
+    "prettier": "^1.16.4",
+    "pretty-quick": "^1.10.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   }

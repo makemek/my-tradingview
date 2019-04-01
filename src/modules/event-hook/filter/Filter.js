@@ -7,7 +7,7 @@ class Filter {
 
   apply(eventName, message) {
     const observerCallback = this.observers[eventName]
-    if(observerCallback === undefined) {
+    if (observerCallback === undefined) {
       return message
     }
 

@@ -1,7 +1,6 @@
 import Filter from '../Filter'
 
 describe('Filter', () => {
-
   describe('#bind', () => {
     describe('bind event to a new observer', () => {
       it('should put expected event name and callback in observers', () => {
@@ -28,18 +27,16 @@ describe('Filter', () => {
         const exsistingCallback = () => 'existingCallback'
         const newCallback = () => 'newCallback'
         filter.observers = {
-          existingEvent: exsistingCallback
+          existingEvent: exsistingCallback,
         }
 
         filter.bind('existingEvent', newCallback)
 
         expect(filter.observers).toEqual({
-          existingEvent: newCallback
+          existingEvent: newCallback,
         })
       })
     })
-
-
   })
 
   describe('#apply', () => {
@@ -48,7 +45,10 @@ describe('Filter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
 
-        const appliedMessage = filter.apply('anEvent', inputMessage)
+        const appliedMessage = filter.apply(
+          'anEvent',
+          inputMessage,
+        )
 
         expect(appliedMessage).toEqual(inputMessage)
       })
@@ -59,15 +59,23 @@ describe('Filter', () => {
         const filter = new Filter()
         const message = 'message2Apply'
         const expectedObserverMessage = 'appliedMessage'
-        const observerCallback = jest.fn().mockReturnValue(expectedObserverMessage)
+        const observerCallback = jest
+          .fn()
+          .mockReturnValue(expectedObserverMessage)
         filter.observers = {
-          shouldNotTriggerEvent: () => 'shouldNotTriggerThisCallback',
+          shouldNotTriggerEvent: () =>
+            'shouldNotTriggerThisCallback',
           shouldTriggerEvent: observerCallback,
         }
 
-        const appliedMessage = filter.apply('shouldTriggerEvent', message)
+        const appliedMessage = filter.apply(
+          'shouldTriggerEvent',
+          message,
+        )
 
-        expect(appliedMessage).toEqual(expectedObserverMessage)
+        expect(appliedMessage).toEqual(
+          expectedObserverMessage,
+        )
         expect(observerCallback.mock.calls.length).toBe(1)
         expect(observerCallback).toBeCalledWith(message)
       })
@@ -83,7 +91,10 @@ describe('Filter', () => {
           event3: () => 'shouldNotTriggerThisCallback',
         }
 
-        const appliedMessage = filter.apply('nonExistingEvent', inputMessage)
+        const appliedMessage = filter.apply(
+          'nonExistingEvent',
+          inputMessage,
+        )
 
         expect(appliedMessage).toEqual(inputMessage)
       })
