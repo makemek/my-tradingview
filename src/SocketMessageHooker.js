@@ -3,8 +3,8 @@ import debug from 'debug'
 const log = debug(`${process.env.APP_NAME}:socket:hooker`)
 
 export default class SocketMessageHooker extends WebSocket {
-  static SOCKET_SEND = 'SEND'
-  static SOCKET_RECEIVE = 'RECEIVE'
+  static SOCKET_SEND = 'SOCKET_SEND'
+  static SOCKET_RECEIVE = 'SOCKET_RECEIVE'
 
   constructor(host, filter, ...socketArgs) {
     super(host, ...socketArgs)
@@ -20,14 +20,17 @@ export default class SocketMessageHooker extends WebSocket {
       this._wrapOnReceiveMessage(this.onmessage)
     }
     log('send', message)
-    this._filter.apply(this.SOCKET_SEND, message)
+    this._filter.apply(
+      SocketMessageHooker.SOCKET_SEND,
+      message,
+    )
     super.send(message)
   }
 
   receive(message) {
     log('receive', message.data)
     const processedMessage = this._filter.apply(
-      this.SOCKET_RECEIVE,
+      SocketMessageHooker.SOCKET_RECEIVE,
       message.data,
     )
     return { ...message, data: processedMessage }
