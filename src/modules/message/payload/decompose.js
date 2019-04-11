@@ -33,18 +33,11 @@ export function withBufferPayload(buffer) {
     if (!signature) {
       break
     }
-    const { length: payloadLength } = getSignatureInfo(
-      signature,
-    )
-    message.payload = message.payload.slice(
-      0,
-      payloadLength,
-    )
+    const { length: payloadLength } = getSignatureInfo(signature)
+    message.payload = message.payload.slice(0, payloadLength)
     messages.push(message)
 
-    nextMessage = nextMessage.slice(
-      signature.length + payloadLength,
-    )
+    nextMessage = nextMessage.slice(signature.length + payloadLength)
   }
 
   return messages
@@ -60,8 +53,7 @@ export function _withBufferPayload(buffer) {
 
   const [sigTiltStart, sigM, sigTiltEnd] = bufferUint8
   const startWithSignature =
-    String.fromCharCode(sigTiltStart, sigM, sigTiltEnd) ===
-    signature
+    String.fromCharCode(sigTiltStart, sigM, sigTiltEnd) === signature
   if (!startWithSignature) {
     return invalidSignature
   }
@@ -75,10 +67,7 @@ export function _withBufferPayload(buffer) {
     3,
   )
   const noTiltEnd = sigTiltEndIdx < 0
-  const payloadByteSize = bufferUint8.slice(
-    3,
-    sigTiltEndIdx,
-  )
+  const payloadByteSize = bufferUint8.slice(3, sigTiltEndIdx)
   const hasNoNumberInSignature =
     findIndex(
       payloadByteSize,
@@ -101,9 +90,7 @@ export function _withBufferPayload(buffer) {
   }
 
   return {
-    signature: bufferUint8
-      .slice(0, sigTiltEndIdx + 3)
-      .toString(),
+    signature: bufferUint8.slice(0, sigTiltEndIdx + 3).toString(),
     payload: buffer.slice(sigTiltEndIdx + 3),
   }
 }

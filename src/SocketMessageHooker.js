@@ -13,17 +13,11 @@ export default class SocketMessageHooker extends WebSocket {
   }
 
   send(message) {
-    if (
-      !!this.onmessage &&
-      !this._alreadyWrapReceiveEvent
-    ) {
+    if (!!this.onmessage && !this._alreadyWrapReceiveEvent) {
       this._wrapOnReceiveMessage(this.onmessage)
     }
     log('send', message)
-    this._filter.apply(
-      SocketMessageHooker.SOCKET_SEND,
-      message,
-    )
+    this._filter.apply(SocketMessageHooker.SOCKET_SEND, message)
     super.send(message)
   }
 

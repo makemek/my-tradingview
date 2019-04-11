@@ -6,6 +6,4 @@ script.src = chrome.runtime.getURL('bundle.js')
 script.onload = function() {
   this.remove()
 }
-;(document.head || document.documentElement).appendChild(
-  script,
-)
+;(document.head || document.documentElement).appendChild(script)

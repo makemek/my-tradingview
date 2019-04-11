@@ -8,16 +8,12 @@ class Builder {
     this._commandByNumber = []
 
     for (const message in this._protoMessage) {
-      this._commandByNumber[
-        this._Msg.Commands[message]
-      ] = message
+      this._commandByNumber[this._Msg.Commands[message]] = message
     }
   }
 
   decode(buffer) {
-    const { command_number, data, time } = this._Msg.decode(
-      buffer,
-    )
+    const { command_number, data, time } = this._Msg.decode(buffer)
     const command = this._commandByNumber[command_number]
 
     return {
@@ -31,9 +27,7 @@ class Builder {
     return this._Msg
       .encode({
         command_number,
-        data: this._protoMessage[command_number].encode(
-          data,
-        ),
+        data: this._protoMessage[command_number].encode(data),
       })
       .toBuffer()
   }

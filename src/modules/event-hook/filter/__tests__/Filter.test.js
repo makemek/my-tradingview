@@ -45,10 +45,7 @@ describe('Filter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
 
-        const appliedMessage = filter.apply(
-          'anEvent',
-          inputMessage,
-        )
+        const appliedMessage = filter.apply('anEvent', inputMessage)
 
         expect(appliedMessage).toEqual(inputMessage)
       })
@@ -63,8 +60,7 @@ describe('Filter', () => {
           .fn()
           .mockReturnValue(expectedObserverMessage)
         filter.observers = {
-          shouldNotTriggerEvent: () =>
-            'shouldNotTriggerThisCallback',
+          shouldNotTriggerEvent: () => 'shouldNotTriggerThisCallback',
           shouldTriggerEvent: observerCallback,
         }
 
@@ -73,9 +69,7 @@ describe('Filter', () => {
           message,
         )
 
-        expect(appliedMessage).toEqual(
-          expectedObserverMessage,
-        )
+        expect(appliedMessage).toEqual(expectedObserverMessage)
         expect(observerCallback.mock.calls.length).toBe(1)
         expect(observerCallback).toBeCalledWith(message)
       })

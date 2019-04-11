@@ -9,9 +9,7 @@ describe('modules/message/payload/compose', () => {
         inputString.length
       }~m~${inputString}`
 
-      const outputString = compose.withStringPayload(
-        inputString,
-      )
+      const outputString = compose.withStringPayload(inputString)
 
       expect(outputString).toEqual(expectedString)
     })

@@ -11,8 +11,7 @@ function injectWebSocket() {
   const RealSocket = window.WebSocket
 
   return function(host, ...args) {
-    const target =
-      'wss://data.tradingview.com/socket.io/websocket'
+    const target = 'wss://data.tradingview.com/socket.io/websocket'
     if (host.includes(target)) {
       const filter = makeFilter()
 

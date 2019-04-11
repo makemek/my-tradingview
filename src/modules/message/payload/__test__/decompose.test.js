@@ -61,9 +61,7 @@ describe('modules/message/payload/decompose', () => {
     describe('valid signature ~m~', () => {
       it('should output expected signature and payload', () => {
         const inputPayload = Buffer.from('x'.repeat(123)) //payload could be huge, like 40000 bytes
-        const signature = Buffer.from(
-          `~m~${inputPayload.length}~m~`,
-        )
+        const signature = Buffer.from(`~m~${inputPayload.length}~m~`)
         const expectedOutput = {
           signature: signature.toString(),
           payload: inputPayload,
@@ -99,9 +97,7 @@ describe('modules/message/payload/decompose', () => {
       it('does not start with ~m~ and end with ~m~', () => {
         const inputPayload = Buffer.from('thisIsAString')
         const signature = Buffer.from(
-          `BROKEN_SIGNATURE~#m ~${
-            inputPayload.length
-          }~&m&~`,
+          `BROKEN_SIGNATURE~#m ~${inputPayload.length}~&m&~`,
         )
 
         const output = _withBufferPayload(
@@ -117,12 +113,8 @@ describe('modules/message/payload/decompose', () => {
     it('should output expected signature and payload', () => {
       const message1 = Buffer.from('message')
       const message2 = Buffer.from('anotherMessage')
-      const signature1 = Buffer.from(
-        `~m~${message1.length}~m~`,
-      )
-      const signature2 = Buffer.from(
-        `~m~${message2.length}~m~`,
-      )
+      const signature1 = Buffer.from(`~m~${message1.length}~m~`)
+      const signature2 = Buffer.from(`~m~${message2.length}~m~`)
       const inputPayload = Buffer.concat([
         signature1,
         message1,

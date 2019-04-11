@@ -7,15 +7,10 @@ describe('Builder', () => {
       session: 'session',
       timezone: 'timezone',
     }
-    const encodedMessage = builder.encode(
-      'switch_timezone',
-      msg,
-    )
+    const encodedMessage = builder.encode('switch_timezone', msg)
     const decodedMessage = builder.decode(encodedMessage)
 
-    expect(decodedMessage.command).toEqual(
-      'switch_timezone',
-    )
+    expect(decodedMessage.command).toEqual('switch_timezone')
     expect(decodedMessage.data).toEqual(msg)
   })
 })
