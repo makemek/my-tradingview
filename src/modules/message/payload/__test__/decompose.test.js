@@ -1,11 +1,12 @@
 import {
   withStringPayload,
+  _withStringPayload,
   withBufferPayload,
   _withBufferPayload,
 } from '../decompose'
 
 describe('modules/message/payload/decompose', () => {
-  describe('#withStringPayload', () => {
+  describe('#_withStringPayload', () => {
     describe('valid signature ~m~', () => {
       it('should output exepcted signature and payload', () => {
         const inputPayload = 'thisIsAString'
@@ -15,7 +16,7 @@ describe('modules/message/payload/decompose', () => {
           payload: inputPayload,
         }
 
-        const output = withStringPayload(
+        const output = _withStringPayload(
           `${signature}${inputPayload}`,
         )
 
@@ -31,14 +32,14 @@ describe('modules/message/payload/decompose', () => {
       it('~m~~m~', () => {
         const signature = '~m~~m~'
 
-        const output = withStringPayload(signature)
+        const output = _withStringPayload(signature)
 
         expect(output).toEqual(expectedOutput)
       })
       it('~m~NOT_NUMBER~m~', () => {
         const signature = '~m~NOT_NUMBER~m~'
 
-        const output = withStringPayload(signature)
+        const output = _withStringPayload(signature)
 
         expect(output).toEqual(expectedOutput)
       })
@@ -48,12 +49,41 @@ describe('modules/message/payload/decompose', () => {
           inputPayload.length
         }~&m&~`
 
-        const output = withStringPayload(
+        const output = _withStringPayload(
           `${signature}${inputPayload}`,
         )
 
         expect(output).toEqual(expectedOutput)
       })
+    })
+  })
+
+  describe('#withStringPayload', () => {
+    it('should output expected signature and payload', () => {
+      const message1 = 'message'
+      const message2 = 'anotherMessage'
+      const signature1 = `~m~${message1.length}~m~`
+      const signature2 = `~m~${message2.length}~m~`
+      const inputPayload = [
+        signature1,
+        message1,
+        signature2,
+        message2,
+      ].join('')
+      const expectedOutput = [
+        {
+          signature: signature1,
+          payload: message1,
+        },
+        {
+          signature: signature2,
+          payload: message2,
+        },
+      ]
+
+      const output = withStringPayload(inputPayload)
+
+      expect(output).toEqual(expectedOutput)
     })
   })
 

@@ -8,6 +8,26 @@ export default {
 }
 
 export function withStringPayload(payload) {
+  const messages = []
+  let nextMessage = payload
+
+  while (nextMessage.length > 0) {
+    const message = _withStringPayload(nextMessage)
+    const { signature } = message
+    if (!signature) {
+      break
+    }
+    const { length: payloadLength } = getSignatureInfo(signature)
+    message.payload = message.payload.slice(0, payloadLength)
+    messages.push(message)
+
+    nextMessage = nextMessage.slice(signature.length + payloadLength)
+  }
+
+  return messages
+}
+
+export function _withStringPayload(payload) {
   const matches = /^~m~(\d+?)~m~/.exec(payload)
   if (!matches) {
     return {
