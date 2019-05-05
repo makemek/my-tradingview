@@ -1,9 +1,7 @@
 console.info('custom trading view has started')
 
 const script = document.createElement('script')
+const rootElement = document.head || document.documentElement
 
 script.src = chrome.runtime.getURL('bundle.js')
-script.onload = function() {
-  this.remove()
-}
-;(document.head || document.documentElement).appendChild(script)
+rootElement.appendChild(script)
