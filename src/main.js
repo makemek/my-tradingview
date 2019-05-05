@@ -5,7 +5,26 @@ import { Builder } from 'modules/message/protobuf'
 
 const log = debug(`${process.env.APP_NAME}:main`)
 
-window.WebSocket = injectWebSocket()
+init()
+
+function init() {
+  const isBackendSocketConnected = !!window.WSBackendConnection
+  window.WebSocket = injectWebSocket()
+
+  // This happends when tradingview backend socket in inline js script executes
+  // before this extension finsish loading
+  // Too late to inject into backend socket.
+  // Usually happends when bundle is large, espicially in dev mode.
+  // Because it takes longer time to load the extension.
+  // Fortunately, backend socket provide interfaces which we can manually restart the connection
+  if (isBackendSocketConnected) {
+    log(
+      'WSBackendConnection has already connected to websocket. Restart connection for injection',
+    )
+    window.WSBackendConnection.disconnect()
+    window.WSBackendConnection.connect()
+  }
+}
 
 function injectWebSocket() {
   const RealSocket = window.WebSocket
