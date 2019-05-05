@@ -5,8 +5,8 @@
     {
       "run_at": "document_start",
       "matches": ["https://www.tradingview.com/*"],
-      "js": ["script-injector.js"]
+      "js": ["script-injector.bundle.js"]
     }
   ],
-  "web_accessible_resources": ["bundle.js"]
+  "web_accessible_resources": ["main.bundle.js"]
 }

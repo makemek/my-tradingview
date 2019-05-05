@@ -7,10 +7,13 @@ const env = process.env.NODE_ENV || 'development'
 
 module.exports = {
   mode: env,
-  entry: './src/main.js',
+  entry: {
+    main: './src/main.js',
+    'script-injector': './src/script-injector.js',
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: '[name].bundle.js',
   },
   module: {
     rules: [
@@ -34,26 +37,20 @@ module.exports = {
       ),
       'process.env.DEBUG': JSON.stringify(process.env.DEBUG),
     }),
-    new CopyWebpackPlugin(
-      [
-        {
-          from: 'manifest.json',
-          transform: function(content, path) {
-            // generates the manifest file using the package.json informations
-            return Buffer.from(
-              JSON.stringify({
-                description: process.env.npm_package_description,
-                version: process.env.npm_package_version,
-                ...JSON.parse(content.toString()),
-              }),
-            )
-          },
+    new CopyWebpackPlugin([
+      {
+        from: 'manifest.json',
+        transform: function(content, path) {
+          // generates the manifest file using the package.json informations
+          return Buffer.from(
+            JSON.stringify({
+              description: process.env.npm_package_description,
+              version: process.env.npm_package_version,
+              ...JSON.parse(content.toString()),
+            }),
+          )
         },
-        {
-          from: 'src/script-injector.js',
-        },
-      ],
-      { copyUnmodified: true },
-    ),
+      },
+    ]),
   ],
 }
