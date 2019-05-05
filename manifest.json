@@ -4,12 +4,8 @@
   "content_scripts": [
     {
       "run_at": "document_start",
-      "matches": [
-        "https://www.tradingview.com/*"
-      ],
-      "js": [
-        "context-injector.js"
-      ]
+      "matches": ["https://www.tradingview.com/*"],
+      "js": ["script-injector.js"]
     }
   ],
   "web_accessible_resources": ["bundle.js"]

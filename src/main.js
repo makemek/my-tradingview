@@ -1,5 +1,5 @@
 import debug from 'debug'
-import SocketMessageHooker from './SocketMessageHooker'
+import { SocketInterceptor } from 'modules/interceptor/socket'
 import { ioFilter } from 'modules/common/helpers'
 import {
   handleStringMessage,
@@ -38,7 +38,7 @@ function injectWebSocket() {
       const filter = makeFilter()
 
       log(`inject web socket ${host}`)
-      return new SocketMessageHooker(host, filter, ...args)
+      return new SocketInterceptor(host, filter, ...args)
     }
 
     log(`use real web socket ${host}`)
@@ -51,8 +51,8 @@ function makeFilter() {
     typeof message === 'string'
       ? handleStringMessage(message)
       : handleBufferMessage(message)
-  ioFilter.bind(SocketMessageHooker.SOCKET_RECEIVE, messageHandler)
-  ioFilter.bind(SocketMessageHooker.SOCKET_SEND, messageHandler)
+  ioFilter.bind(SocketInterceptor.SOCKET_RECEIVE, messageHandler)
+  ioFilter.bind(SocketInterceptor.SOCKET_SEND, messageHandler)
 
   return ioFilter
 }

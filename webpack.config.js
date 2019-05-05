@@ -21,9 +21,7 @@ module.exports = {
     ],
   },
   devtool:
-    env === 'production'
-      ? undefined
-      : 'cheap-module-eval-source-map',
+    env === 'production' ? undefined : 'cheap-module-eval-source-map',
   plugins: [
     new webpack.ProgressPlugin(),
     // clean the build folder
@@ -34,9 +32,7 @@ module.exports = {
       'process.env.APP_NAME': JSON.stringify(
         process.env.npm_package_name,
       ),
-      'process.env.DEBUG': JSON.stringify(
-        process.env.DEBUG,
-      ),
+      'process.env.DEBUG': JSON.stringify(process.env.DEBUG),
     }),
     new CopyWebpackPlugin(
       [
@@ -46,8 +42,7 @@ module.exports = {
             // generates the manifest file using the package.json informations
             return Buffer.from(
               JSON.stringify({
-                description:
-                  process.env.npm_package_description,
+                description: process.env.npm_package_description,
                 version: process.env.npm_package_version,
                 ...JSON.parse(content.toString()),
               }),
@@ -55,7 +50,7 @@ module.exports = {
           },
         },
         {
-          from: 'src/context-injector.js',
+          from: 'src/script-injector.js',
         },
       ],
       { copyUnmodified: true },
