@@ -15,7 +15,7 @@ export function withBufferPayload(...payload) {
   const payloadWithSignature = payload.map((buffer) =>
     Buffer.concat([
       Buffer.from(`~m~${buffer.byteLength}~m~`),
-      buffer,
+      Buffer.from(buffer),
     ]),
   )
   return Buffer.concat(payloadWithSignature)
