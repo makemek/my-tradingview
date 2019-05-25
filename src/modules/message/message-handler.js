@@ -4,9 +4,11 @@ import { ioFilter } from 'modules/common/helpers'
 import { compose, decompose } from './payload'
 import { isHeartbeat } from './heartbeat'
 import { Builder } from './protobuf'
+import { CommandFieldConverter, schema } from './command'
 
 const log = debug(`${process.env.APP_NAME}:message-handler`)
 const builder = new Builder()
+const commandConverter = new CommandFieldConverter(schema)
 
 export function handleStringMessage(message) {
   const messages = decompose.withStringPayload(message)
@@ -18,10 +20,18 @@ export function handleStringMessage(message) {
   const modifiedMessages = messages.map((message) => {
     const { payload } = message
     const { m: command, p: data } = JSON.parse(payload)
-    const modifiedData = ioFilter.apply(command, data)
+    const commandFields = commandConverter.toCommandFields(
+      command,
+      data,
+    )
+    const modifiedData = ioFilter.apply(command, commandFields)
+    const fieldArray = commandConverter.toFieldArray(
+      command,
+      modifiedData,
+    )
     const inputPayload = JSON.stringify({
       m: command,
-      p: modifiedData,
+      p: fieldArray,
     })
     log('decomposed', command, data)
     return compose.withStringPayload(inputPayload)
