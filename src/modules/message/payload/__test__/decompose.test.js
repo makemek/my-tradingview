@@ -24,13 +24,12 @@ describe('modules/message/payload/decompose', () => {
       })
     })
     describe('invalid signature ~m~', () => {
-      const expectedOutput = {
-        signature: null,
-        payload: null,
-      }
-
       it('~m~~m~', () => {
         const signature = '~m~~m~'
+        const expectedOutput = {
+          signature: null,
+          payload: signature,
+        }
 
         const output = _withStringPayload(signature)
 
@@ -38,6 +37,10 @@ describe('modules/message/payload/decompose', () => {
       })
       it('~m~NOT_NUMBER~m~', () => {
         const signature = '~m~NOT_NUMBER~m~'
+        const expectedOutput = {
+          signature: null,
+          payload: signature,
+        }
 
         const output = _withStringPayload(signature)
 
@@ -48,10 +51,27 @@ describe('modules/message/payload/decompose', () => {
         const signature = `BROKEN_SIGNATURE~#m ~${
           inputPayload.length
         }~&m&~`
+        const input = `${signature}${inputPayload}`
+        const expectedOutput = {
+          signature: null,
+          payload: input,
+        }
 
-        const output = _withStringPayload(
-          `${signature}${inputPayload}`,
-        )
+        const output = _withStringPayload(input)
+
+        expect(output).toEqual(expectedOutput)
+      })
+    })
+    // this message sometimes appear when connection is idle for a long time
+    describe('heartbeat with no signature', () => {
+      it('should return expected signature and payload', () => {
+        const inputPayload = '~h~1'
+        const expectedOutput = {
+          signature: null,
+          payload: inputPayload,
+        }
+
+        const output = _withStringPayload(inputPayload)
 
         expect(output).toEqual(expectedOutput)
       })

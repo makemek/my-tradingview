@@ -17,6 +17,9 @@ export function handleStringMessage(message) {
   if (messages.length === 1 && isHeartbeat(heartbeatSignature)) {
     return ioFilter.apply('heartbeat', heartbeatSignature)
   }
+  if (!firstMessage.signature) {
+    return message
+  }
   const modifiedMessages = messages.map((message) => {
     const { payload } = message
     const { m: command, p: data } = JSON.parse(payload)

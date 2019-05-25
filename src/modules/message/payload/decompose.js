@@ -15,13 +15,17 @@ export function withStringPayload(payload) {
     const message = _withStringPayload(nextMessage)
     const { signature } = message
     if (!signature) {
+      messages.push(message)
       break
-    }
-    const { length: payloadLength } = getSignatureInfo(signature)
-    message.payload = message.payload.slice(0, payloadLength)
-    messages.push(message)
+    } else {
+      const { length: payloadLength } = getSignatureInfo(signature)
+      message.payload = message.payload.slice(0, payloadLength)
+      messages.push(message)
 
-    nextMessage = nextMessage.slice(signature.length + payloadLength)
+      nextMessage = nextMessage.slice(
+        signature.length + payloadLength,
+      )
+    }
   }
 
   return messages
@@ -32,7 +36,7 @@ export function _withStringPayload(payload) {
   if (!matches) {
     return {
       signature: null,
-      payload: null,
+      payload,
     }
   }
   const [signature] = matches
