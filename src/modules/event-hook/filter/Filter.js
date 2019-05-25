@@ -2,16 +2,26 @@ class Filter {
   observers = {}
 
   bind(eventName, callback) {
-    this.observers[eventName] = callback
+    const subscribers = this.observers[eventName]
+    if (!subscribers) {
+      this.observers[eventName] = [callback]
+    } else {
+      subscribers.push(callback)
+      this.observers[eventName] = subscribers
+    }
   }
 
   apply(eventName, message) {
-    const observerCallback = this.observers[eventName]
-    if (observerCallback === undefined) {
+    const observerCallbacks = this.observers[eventName]
+    if (observerCallbacks === undefined) {
       return message
     }
 
-    return observerCallback(message)
+    return observerCallbacks.reduce(
+      (accumulateMessage, currentObserver) =>
+        currentObserver(accumulateMessage),
+      message,
+    )
   }
 }
 

@@ -14,26 +14,26 @@ describe('Filter', () => {
         filter.bind('event3', callback3)
 
         expect(filter.observers).toEqual({
-          event1: callback1,
-          event2: callback2,
-          event3: callback3,
+          event1: [callback1],
+          event2: [callback2],
+          event3: [callback3],
         })
       })
     })
 
     describe('bind event to an existing observer', () => {
-      it('should overwrite existing observer', () => {
+      it('should append observer', () => {
         const filter = new Filter()
         const exsistingCallback = () => 'existingCallback'
         const newCallback = () => 'newCallback'
         filter.observers = {
-          existingEvent: exsistingCallback,
+          existingEvent: [exsistingCallback],
         }
 
         filter.bind('existingEvent', newCallback)
 
         expect(filter.observers).toEqual({
-          existingEvent: newCallback,
+          existingEvent: [exsistingCallback, newCallback],
         })
       })
     })
@@ -60,8 +60,10 @@ describe('Filter', () => {
           .fn()
           .mockReturnValue(expectedObserverMessage)
         filter.observers = {
-          shouldNotTriggerEvent: () => 'shouldNotTriggerThisCallback',
-          shouldTriggerEvent: observerCallback,
+          shouldNotTriggerEvent: [
+            () => 'shouldNotTriggerThisCallback',
+          ],
+          shouldTriggerEvent: [observerCallback],
         }
 
         const appliedMessage = filter.apply(
@@ -80,9 +82,9 @@ describe('Filter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
         filter.observers = {
-          event1: () => 'shouldNotTriggerThisCallback',
-          event2: () => 'shouldNotTriggerThisCallback',
-          event3: () => 'shouldNotTriggerThisCallback',
+          event1: [() => 'shouldNotTriggerThisCallback'],
+          event2: [() => 'shouldNotTriggerThisCallback'],
+          event3: [() => 'shouldNotTriggerThisCallback'],
         }
 
         const appliedMessage = filter.apply(
