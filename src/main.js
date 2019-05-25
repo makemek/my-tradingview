@@ -1,6 +1,6 @@
 import debug from 'debug'
 import { SocketInterceptor } from 'modules/interceptor/socket'
-import { ioFilter } from 'modules/common/helpers'
+import { Filter } from 'modules/event-hook/filter'
 import {
   handleStringMessage,
   handleBufferMessage,
@@ -51,8 +51,9 @@ function makeFilter() {
     typeof message === 'string'
       ? handleStringMessage(message)
       : handleBufferMessage(message)
-  ioFilter.bind(SocketInterceptor.SOCKET_RECEIVE, messageHandler)
-  ioFilter.bind(SocketInterceptor.SOCKET_SEND, messageHandler)
+  const filter = new Filter()
+  filter.bind(SocketInterceptor.SOCKET_RECEIVE, messageHandler)
+  filter.bind(SocketInterceptor.SOCKET_SEND, messageHandler)
 
-  return ioFilter
+  return filter
 }
