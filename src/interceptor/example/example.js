@@ -11,7 +11,8 @@ export default (config) => (hook) => {
   hook.bind(qsd, (data) => {
     log('processing qsd', data, config)
 
-    // must return filtered data even though we don't do anything to it
+    // it is a good practice to return filtered data even though we don't do anything to it
+    // by default, if nothing is returned, the original data will be passed to the next listener
     return data
   })
 }

@@ -75,6 +75,25 @@ describe('Filter', () => {
         expect(observerCallback.mock.calls.length).toBe(1)
         expect(observerCallback).toBeCalledWith(message)
       })
+
+      it('should pass processed value to next observer', () => {
+        const filter = new Filter()
+        const message = 'message2Apply'
+        const observer1 = (msg) => msg
+        const observer2 = () => {} // only subscribes, and not return any data
+        const observer3 = (msg) => msg
+
+        filter.observers = {
+          shouldTriggerEvent: [observer1, observer2, observer3],
+        }
+
+        const appliedMessage = filter.apply(
+          'shouldTriggerEvent',
+          message,
+        )
+
+        expect(appliedMessage).toEqual(message)
+      })
     })
 
     describe('has obsesrver and no event match with what observer subscribe', () => {

@@ -1,3 +1,5 @@
+import defaultTo from 'lodash/defaultTo'
+
 class Filter {
   observers = {}
 
@@ -19,7 +21,10 @@ class Filter {
 
     return observerCallbacks.reduce(
       (accumulateMessage, currentObserver) =>
-        currentObserver(accumulateMessage),
+        defaultTo(
+          currentObserver(accumulateMessage),
+          accumulateMessage,
+        ),
       message,
     )
   }
