@@ -2,6 +2,7 @@ const path = require('path')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 
 const env = process.env.NODE_ENV || 'development'
 
@@ -52,5 +53,6 @@ module.exports = {
         },
       },
     ]),
+    new LodashModuleReplacementPlugin(),
   ],
 }
