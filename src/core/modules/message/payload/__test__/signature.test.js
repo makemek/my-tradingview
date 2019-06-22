@@ -1,6 +1,6 @@
 import { getSignatureInfo } from '../signature'
 
-describe('modules/message/payload/signature', () => {
+describe('core/modules/message/payload/signature', () => {
   describe('#getSignatureInfo', () => {
     describe('valid signature', () => {
       it('~m~1234~m~', () => {

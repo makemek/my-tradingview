@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-const log = debug(`${process.env.APP_NAME}:socket:hooker`)
+const log = debug(`${process.env.APP_NAME}:core:interceptor`)
 
 export default class SocketInterceptor extends WebSocket {
   static SOCKET_SEND = 'SOCKET_SEND'

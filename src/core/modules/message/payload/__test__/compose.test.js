@@ -1,7 +1,7 @@
 import * as compose from '../compose'
 import { TextEncoder, TextDecoder } from 'util'
 
-describe('modules/message/payload/compose', () => {
+describe('core/modules/message/payload/compose', () => {
   describe('#withStringPayload', () => {
     it('should output expected string', () => {
       const inputString1 = 'thisIsAString1'

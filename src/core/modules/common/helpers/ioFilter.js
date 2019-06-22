@@ -1,4 +1,4 @@
-import { Filter } from 'modules/event-hook/filter'
+import { Filter } from 'core/modules/event-hook/filter'
 
 /**
  * Singleton object for other modules to bind

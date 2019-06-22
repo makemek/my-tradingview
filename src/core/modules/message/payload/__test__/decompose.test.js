@@ -5,7 +5,7 @@ import {
   _withBufferPayload,
 } from '../decompose'
 
-describe('modules/message/payload/decompose', () => {
+describe('core/modules/message/payload/decompose', () => {
   describe('#_withStringPayload', () => {
     describe('valid signature ~m~', () => {
       it('should output exepcted signature and payload', () => {

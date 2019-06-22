@@ -1,12 +1,12 @@
 import debug from 'debug'
 import { Buffer } from 'buffer'
-import { ioFilter } from 'modules/common/helpers'
+import { ioFilter } from 'core/modules/common/helpers'
 import { compose, decompose } from './payload'
 import { isHeartbeat } from './heartbeat'
 import { Builder } from './protobuf'
 import { CommandFieldConverter, schema } from './command'
 
-const log = debug(`${process.env.APP_NAME}:message-handler`)
+const log = debug(`${process.env.APP_NAME}:core:message`)
 const builder = new Builder()
 const commandConverter = new CommandFieldConverter(schema)
 
@@ -15,6 +15,7 @@ export function handleStringMessage(message) {
   const [firstMessage] = messages
   const heartbeatSignature = firstMessage.payload.slice(0, 4)
   if (messages.length === 1 && isHeartbeat(heartbeatSignature)) {
+    log('string:heartbeat', heartbeatSignature)
     return ioFilter.apply('heartbeat', heartbeatSignature)
   }
   if (!firstMessage.signature) {
@@ -36,7 +37,7 @@ export function handleStringMessage(message) {
       m: command,
       p: fieldArray,
     })
-    log('decomposed', command, data)
+    log('string:decomposed', command, data)
     return compose.withStringPayload(inputPayload)
   })
 
@@ -50,6 +51,7 @@ export function handleBufferMessage(message) {
     firstMessage.payload.slice(0, 4),
   ).toString()
   if (messages.length === 1 && isHeartbeat(heartbeatSignature)) {
+    log('buffer:heartbeat', heartbeatSignature)
     return ioFilter.apply('heartbeat', heartbeatSignature)
   }
   const modifiedMessages = messages.map((message) => {
@@ -57,7 +59,7 @@ export function handleBufferMessage(message) {
     const { command, data } = builder.decode(payload)
     const modifiedData = ioFilter.apply(command, data)
     const inputPayload = builder.encode(command, modifiedData)
-    log('decomposed', command, data)
+    log('buffer:decomposed', command, data)
     return compose.withBufferPayload(inputPayload)
   })
 

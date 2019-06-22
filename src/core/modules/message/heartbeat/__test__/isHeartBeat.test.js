@@ -1,6 +1,6 @@
 import isHeartbeat from '../isHeartbeat'
 
-describe('modules/message/heartbeat', () => {
+describe('core/modules/message/heartbeat', () => {
   describe('#verify', () => {
     describe('valid', () => {
       it('~h~1234', () => {
