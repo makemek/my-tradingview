@@ -1,0 +1,58 @@
+{
+  "messages": [
+    {
+      "name": "Msg",
+      "syntax": "proto2",
+      "fields": [
+        {
+          "rule": "optional",
+          "type": "Commands",
+          "name": "command_number",
+          "id": 1
+        },
+        {
+          "rule": "optional",
+          "type": "bytes",
+          "name": "data",
+          "id": 2
+        },
+        {
+          "rule": "optional",
+          "type": "int32",
+          "name": "time",
+          "id": 3
+        }
+      ],
+      "enums": [
+        {
+          "name": "Commands",
+          "syntax": "proto2",
+          "values": [
+            {
+              "name": "switch_timezone",
+              "id": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "switch_timezone",
+      "syntax": "proto2",
+      "fields": [
+        {
+          "rule": "optional",
+          "type": "string",
+          "name": "session",
+          "id": 1
+        },
+        {
+          "rule": "optional",
+          "type": "string",
+          "name": "timezone",
+          "id": 2
+        }
+      ]
+    }
+  ]
+}

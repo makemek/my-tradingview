@@ -29,6 +29,14 @@ class CommandFieldConverter {
     }, [])
   }
 
+  toEnum() {
+    const output = Object.keys(this._cmdFields).reduce((acc, key) => {
+      acc[key] = key
+      return acc
+    }, {})
+    return output
+  }
+
   _command2key(model) {
     const reducer = (acc, cur) => {
       const { name, fields } = cur

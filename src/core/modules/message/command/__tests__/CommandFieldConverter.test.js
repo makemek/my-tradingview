@@ -140,6 +140,30 @@ describe('modules/command/CommandFieldConverter', () => {
       })
     })
   })
+
+  describe('#toEnum', () => {
+    it('should return expected enum', () => {
+      const schema = makeSchema(
+        {
+          name: 'myCommand0',
+          fields: [
+            { name: 'field1', id: 1 },
+            { name: 'field2', id: 2 },
+            { name: 'field3', id: 3 },
+          ],
+        },
+        {
+          name: 'myCommand1',
+          fields: [{ name: 'field1', id: 1 }],
+        },
+      )
+
+      const converter = new CommandFieldConverter(schema)
+      const result = converter.toEnum()
+      expect(result.myCommand0).toEqual('myCommand0')
+      expect(result.myCommand1).toEqual('myCommand1')
+    })
+  })
 })
 
 function makeSchema(...commands) {

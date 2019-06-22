@@ -6,7 +6,12 @@ export default (config) => (hook) => {
   // do anything with the config
 
   // bind to event
-  hook.bind('SOME_EVENT', () => {
-    log(config)
+  // for ease of use, there is an enum EVENT which contains all available event name
+  const { qsd } = hook.EVENT
+  hook.bind(qsd, (data) => {
+    log('processing qsd', data, config)
+
+    // must return filtered data even though we don't do anything to it
+    return data
   })
 }

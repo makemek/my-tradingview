@@ -1,8 +1,7 @@
 import protobuf from 'protobufjs'
-import { schema } from '../command'
 
 class Builder {
-  constructor(protobufSchema = schema) {
+  constructor(protobufSchema) {
     this._protoMessage = protobuf.loadJson(protobufSchema).build()
     this._Msg = this._protoMessage.Msg
     this._commandByNumber = []
