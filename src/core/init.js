@@ -5,6 +5,7 @@ import {
   handleStringMessage,
   handleBufferMessage,
 } from 'core/modules/message/message-handler'
+import { CHART_WEBSOCKET } from 'config'
 
 const log = logger('core')
 
@@ -31,8 +32,7 @@ function injectWebSocket() {
   const RealSocket = window.WebSocket
 
   return function(host, ...args) {
-    const target = 'wss://data.tradingview.com/socket.io/websocket'
-    if (host.includes(target)) {
+    if (host.includes(CHART_WEBSOCKET)) {
       const filter = makeFilter()
 
       log(`inject web socket ${host}`)
