@@ -1,4 +1,4 @@
-import debug from 'debug'
+import { logger } from 'lib/logger'
 import { SocketInterceptor } from 'core/modules/interceptor/socket'
 import { Filter } from 'core/modules/event-hook/filter'
 import {
@@ -6,7 +6,7 @@ import {
   handleBufferMessage,
 } from 'core/modules/message/message-handler'
 
-const log = debug(`${process.env.APP_NAME}:core`)
+const log = logger('core')
 
 export default function init() {
   const isBackendSocketConnected = !!window.WSBackendConnection

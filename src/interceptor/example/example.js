@@ -1,6 +1,6 @@
-import debug from 'debug'
+import { logger } from 'lib/logger'
 
-const log = debug(`${process.env.APP_NAME}:interceptor:example`)
+const log = logger('interceptor:example')
 
 export default (config) => (hook) => {
   // do anything with the config

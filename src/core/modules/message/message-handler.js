@@ -1,5 +1,5 @@
-import debug from 'debug'
 import { Buffer } from 'buffer'
+import { logger } from 'lib/logger'
 import { ioFilter } from 'core/modules/common/helpers'
 import { compose, decompose } from './payload'
 import { isHeartbeat } from './heartbeat'
@@ -7,7 +7,7 @@ import { Builder } from './protobuf'
 import { CommandFieldConverter } from './command'
 import { schema } from 'core/modules/common/schema'
 
-const log = debug(`${process.env.APP_NAME}:core:message`)
+const log = logger('core:message')
 const builder = new Builder(schema)
 const commandConverter = new CommandFieldConverter(schema)
 

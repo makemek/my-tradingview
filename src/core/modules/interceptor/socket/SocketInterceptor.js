@@ -1,6 +1,6 @@
-import debug from 'debug'
+import { logger } from 'lib/logger'
 
-const log = debug(`${process.env.APP_NAME}:core:interceptor`)
+const log = logger('core:interceptor')
 
 export default class SocketInterceptor extends WebSocket {
   static SOCKET_SEND = 'SOCKET_SEND'
