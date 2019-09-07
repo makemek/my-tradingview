@@ -164,6 +164,31 @@ describe('modules/command/CommandFieldConverter', () => {
       expect(result.myCommand1).toEqual('myCommand1')
     })
   })
+
+  describe('#getField', () => {
+    it('should return expected field', () => {
+      const schema = makeSchema(
+        {
+          name: 'myCommand0',
+          fields: [
+            { name: 'field1', id: 1 },
+            { name: 'field2', id: 2 },
+          ],
+        },
+        {
+          name: 'myCommand1',
+          fields: [{ name: 'field1', id: 1 }],
+        },
+      )
+
+      const converter = new CommandFieldConverter(schema)
+      const result = converter.getField('myCommand0')
+      expect(result).toEqual([
+        { name: 'field1', id: 1 },
+        { name: 'field2', id: 2 },
+      ])
+    })
+  })
 })
 
 function makeSchema(...commands) {

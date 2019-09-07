@@ -37,6 +37,10 @@ class CommandFieldConverter {
     return output
   }
 
+  getField(command) {
+    return this._cmdFields[command]
+  }
+
   _command2key(model) {
     const reducer = (acc, cur) => {
       const { name, fields } = cur
