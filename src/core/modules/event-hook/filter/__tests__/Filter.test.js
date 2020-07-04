@@ -1,6 +1,6 @@
 import Filter from '../Filter'
 
-describe('Filter', () => {
+describe.skip('Filter', () => {
   describe('#bind', () => {
     describe('bind event to a new observer', () => {
       it('should put expected event name and callback in observers', () => {

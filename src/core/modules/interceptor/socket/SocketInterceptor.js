@@ -1,4 +1,6 @@
 import { logger } from 'lib/logger'
+import { webSocket } from 'rxjs/webSocket'
+import { map } from 'rxjs/operators'
 
 const log = logger('core:interceptor')
 
@@ -7,7 +9,8 @@ export default class SocketInterceptor extends WebSocket {
   static SOCKET_RECEIVE = 'SOCKET_RECEIVE'
 
   constructor(host, filter, ...socketArgs) {
-    super(host, ...socketArgs)
+    super()
+    this._socketSubject = webSocket(host, ...socketArgs)
     this._alreadyWrapReceiveEvent = false
     this._filter = filter
   }
@@ -17,23 +20,25 @@ export default class SocketInterceptor extends WebSocket {
       this._wrapOnReceiveMessage(this.onmessage)
     }
     log('send', message)
-    this._filter.apply(SocketInterceptor.SOCKET_SEND, message)
-    super.send(message)
+    const stream$ = this._filter.apply(SocketInterceptor.SOCKET_SEND, message)
+    stream$.subscribe(message => this._socketSubject.next(message))
   }
 
   receive(message) {
     log('receive', message.data)
-    const processedMessage = this._filter.apply(
+    const stream$ = this._filter.apply(
       SocketInterceptor.SOCKET_RECEIVE,
       message.data,
     )
-    return { ...message, data: processedMessage }
+    return stream$.pipe(
+      map(processedMessage => ({ ...message, data: processedMessage }))
+    )
   }
 
   _wrapOnReceiveMessage(functionToWrap) {
     this.onmessage = (message) => {
-      const processedMessage = this.receive(message)
-      functionToWrap(processedMessage)
+      const stream$ = this.receive(message)
+      stream$.subscribe(processedMessage => functionToWrap(processedMessage))
     }
     this._alreadyWrapReceiveEvent = true
   }
