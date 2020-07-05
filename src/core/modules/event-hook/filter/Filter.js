@@ -1,10 +1,9 @@
 import defaultTo from 'lodash/defaultTo'
-import { Subject } from 'rxjs'
+import { of } from 'rxjs'
 import { map } from 'rxjs/operators'
 
 class Filter {
   eventOperators = {}
-  subject = new Subject()
 
   bind(eventName, callback) {
     const newOperator = makeSafeFilterChainOperator(callback)
@@ -18,25 +17,16 @@ class Filter {
   }
 
   apply(eventName, message) {
-    this.subject.pipe(...this.eventOperators[eventName])
-    this.subject.next({
+    const stream$ = of({
       type: eventName,
       payload: message,
     })
-    return this.subject
-    // const observerCallbacks = this.observers[eventName]
-    // if (observerCallbacks === undefined) {
-    //   return message
-    // }
-    //
-    // return observerCallbacks.reduce(
-    //   (accumulateMessage, currentObserver) =>
-    //     defaultTo(
-    //       currentObserver(accumulateMessage),
-    //       accumulateMessage,
-    //     ),
-    //   message,
-    // )
+    const operators = this.eventOperators[eventName]
+
+    if (!operators) {
+      return stream$
+    }
+    return stream$.pipe(...operators)
   }
 }
 
@@ -45,6 +35,7 @@ function makeSafeFilterChainOperator(callback) {
     const { payload } = action
     try {
       const result = callback(payload)
+      console.log(action, result)
       return {
         ...action,
         payload: defaultTo(result, payload),

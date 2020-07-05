@@ -18,7 +18,7 @@ export function handleStringMessage(message) {
   const heartbeatSignature = firstMessage.payload.slice(0, 4)
   if (messages.length === 1 && isHeartbeat(heartbeatSignature)) {
     log('string:heartbeat', heartbeatSignature)
-    return ioFilter.apply('heartbeat', heartbeatSignature)
+    return ioFilter.apply('heartbeat', heartbeatSignature) // TODO this return stream instead of string
   }
   if (!firstMessage.signature) {
     return message
