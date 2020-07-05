@@ -5,7 +5,7 @@ import {
   handleStringMessage,
   handleBufferMessage,
 } from 'core/modules/message/message-handler'
-import { CHART_WEBSOCKET } from 'config'
+import { CHART_WEBSOCKET, PRO_CHART_WEBSOCKET } from 'config'
 
 const log = logger('core')
 
@@ -32,11 +32,18 @@ function injectWebSocket() {
   const RealSocket = window.WebSocket
 
   return function(host, ...args) {
-    if (host.includes(CHART_WEBSOCKET)) {
+    if (
+      host.includes(CHART_WEBSOCKET) ||
+      host.includes(PRO_CHART_WEBSOCKET)
+    ) {
       const filter = makeFilter()
 
       log(`inject web socket ${host}`)
-      return new SocketInterceptor(host, filter, ...args)
+      return new SocketInterceptor(
+        PRO_CHART_WEBSOCKET,
+        filter,
+        ...args,
+      )
     }
 
     log(`use real web socket ${host}`)
