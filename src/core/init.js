@@ -1,10 +1,7 @@
 import { logger } from 'lib/logger'
 import { SocketInterceptor } from 'core/modules/interceptor/socket'
 import { Filter } from 'core/modules/event-hook/filter'
-import {
-  handleStringMessage,
-  handleBufferMessage,
-} from 'core/modules/message/message-handler'
+import { routeMessage } from 'core/modules/message/message-handler'
 import { CHART_WEBSOCKET, PRO_CHART_WEBSOCKET } from 'config'
 
 const log = logger('core')
@@ -52,13 +49,9 @@ function injectWebSocket() {
 }
 
 function makeFilter() {
-  const messageHandler = (message) =>
-    typeof message === 'string'
-      ? handleStringMessage(message)
-      : handleBufferMessage(message)
   const filter = new Filter()
-  filter.bind(SocketInterceptor.SOCKET_RECEIVE, messageHandler)
-  filter.bind(SocketInterceptor.SOCKET_SEND, messageHandler)
+  filter.bind(SocketInterceptor.SOCKET_RECEIVE, routeMessage)
+  filter.bind(SocketInterceptor.SOCKET_SEND, routeMessage)
 
   return filter
 }
