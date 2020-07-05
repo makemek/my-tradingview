@@ -2,6 +2,8 @@ import { Buffer } from 'buffer'
 import { logger } from 'lib/logger'
 import { ioFilter } from 'core/modules/common/helpers'
 import pick from 'lodash/pick'
+import { map, mergeMap, filter } from 'rxjs/operators'
+
 import { compose, decompose } from './payload'
 import { isHeartbeat } from './heartbeat'
 import { Builder } from './protobuf'
@@ -12,42 +14,66 @@ const log = logger('core:message')
 const builder = new Builder(schema)
 const commandConverter = new CommandFieldConverter(schema)
 
-export function handleStringMessage(message) {
-  const messages = decompose.withStringPayload(message)
-  const [firstMessage] = messages
-  const heartbeatSignature = firstMessage.payload.slice(0, 4)
-  if (messages.length === 1 && isHeartbeat(heartbeatSignature)) {
-    log('string:heartbeat', heartbeatSignature)
-    return ioFilter.apply('heartbeat', heartbeatSignature) // TODO this return stream instead of string
-  }
-  if (!firstMessage.signature) {
-    return message
-  }
-  const modifiedMessages = messages.map((message) => {
-    const { payload } = message
-    const { m: command, p: data } = JSON.parse(payload)
-    const commandFields = commandConverter.toCommandFields(
-      command,
-      data,
-    )
-    const modifiedData = ioFilter.apply(command, commandFields)
-    const cleanModifiedData = _cleanForignFields(
-      modifiedData,
-      command,
-    )
-    const fieldArray = commandConverter.toFieldArray(
-      command,
-      cleanModifiedData,
-    )
-    const inputPayload = JSON.stringify({
-      m: command,
-      p: fieldArray,
-    })
-    log('string:decomposed', command, data)
-    return compose.withStringPayload(inputPayload)
-  })
+export function handleStringMessage() {
+  return (stream$) =>
+    stream$.pipe(
+      map(function decomposeEmbeddedMessages(embeddedMessages) {
+        return decompose.withStringPayload(embeddedMessages)
+      }),
+      filter(function heartbeatWithoutSigature([firstMessage]) {
+        const heartbeatWithoutSigature = !firstMessage.signature
+        if (heartbeatWithoutSigature) {
+          stream$.complete(firstMessage.payload)
+          return false
+        }
+        return true
+      }),
+      filter(function heartbeat(messages) {
+        const [firstMessage] = messages
+        const heartbeatSignature = firstMessage.payload.slice(0, 4)
+        if (
+          messages.length === 1 &&
+          isHeartbeat(heartbeatSignature)
+        ) {
+          log('string:heartbeat', heartbeatSignature)
+          ioFilter
+            .apply('heartbeat', heartbeatSignature)
+            .subscribe((value) => stream$.complete(value))
+          return false
+        }
 
-  return modifiedMessages.join('')
+        return true
+      }),
+      mergeMap(function transformMessages(message) {
+        const { payload } = message
+        const { m: command, p: data } = JSON.parse(payload)
+        const commandFields = commandConverter.toCommandFields(
+          command,
+          data,
+        )
+        return ioFilter.apply(command, commandFields).pipe(
+          map((modifiedData) => {
+            const cleanModifiedData = _cleanForignFields(
+              modifiedData,
+              command,
+            )
+            const fieldArray = commandConverter.toFieldArray(
+              command,
+              cleanModifiedData,
+            )
+            const inputPayload = JSON.stringify({
+              m: command,
+              p: fieldArray,
+            })
+            log('string:decomposed', command, data)
+            return compose.withStringPayload(inputPayload)
+          }),
+        )
+      }),
+      map(function combineMessages(modifiedMessages) {
+        return modifiedMessages.join('')
+      }),
+    )
 }
 
 export function handleBufferMessage(message) {
