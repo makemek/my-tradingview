@@ -5,8 +5,7 @@ import { map } from 'rxjs/operators'
 class Filter {
   eventOperators = {}
 
-  bind(eventName, callback) {
-    const newOperator = makeSafeFilterChainOperator(callback)
+  bind(eventName, newOperator) {
     const operators = this.eventOperators[eventName]
     if (!operators) {
       this.eventOperators[eventName] = [newOperator]
@@ -28,23 +27,6 @@ class Filter {
     }
     return stream$.pipe(...operators)
   }
-}
-
-function makeSafeFilterChainOperator(callback) {
-  return map((action) => {
-    const { payload } = action
-    try {
-      const result = callback(payload)
-      console.log(action, result)
-      return {
-        ...action,
-        payload: defaultTo(result, payload),
-      }
-    } catch (error) {
-      console.error(error)
-      return action
-    }
-  })
 }
 
 export default Filter
