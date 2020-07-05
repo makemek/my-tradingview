@@ -9,36 +9,39 @@ export default class SocketInterceptor extends WebSocket {
   static SOCKET_RECEIVE = 'SOCKET_RECEIVE'
 
   constructor(host, filter, ...socketArgs) {
-    super()
-    this._socketSubject = webSocket(host, ...socketArgs)
+    super(host, ...socketArgs)
     this._alreadyWrapReceiveEvent = false
     this._filter = filter
   }
 
   send(message) {
+    console.log('message', message)
     if (!!this.onmessage && !this._alreadyWrapReceiveEvent) {
       this._wrapOnReceiveMessage(this.onmessage)
     }
     log('send', message)
-    const stream$ = this._filter.apply(SocketInterceptor.SOCKET_SEND, message)
-    stream$.subscribe(message => this._socketSubject.next(message))
+    // this._filter.apply(SocketInterceptor.SOCKET_SEND, message)
+    super.send(message)
   }
 
   receive(message) {
+    console.log('receive', message)
     log('receive', message.data)
     const stream$ = this._filter.apply(
       SocketInterceptor.SOCKET_RECEIVE,
       message.data,
     )
     return stream$.pipe(
-      map(processedMessage => ({ ...message, data: processedMessage }))
+      map(({ payload }) => ({ ...message, data: payload }))
     )
   }
 
   _wrapOnReceiveMessage(functionToWrap) {
     this.onmessage = (message) => {
       const stream$ = this.receive(message)
-      stream$.subscribe(processedMessage => functionToWrap(processedMessage))
+      stream$.subscribe(processedMessage => {
+        console.log(processedMessage)
+      })
     }
     this._alreadyWrapReceiveEvent = true
   }
