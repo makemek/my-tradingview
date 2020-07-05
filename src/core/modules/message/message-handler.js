@@ -76,30 +76,51 @@ export function handleStringMessage() {
     )
 }
 
-export function handleBufferMessage(message) {
-  const messages = decompose.withBufferPayload(message)
-  const [firstMessage] = messages
-  const heartbeatSignature = Buffer.from(
-    firstMessage.payload.slice(0, 4),
-  ).toString()
-  if (messages.length === 1 && isHeartbeat(heartbeatSignature)) {
-    log('buffer:heartbeat', heartbeatSignature)
-    return ioFilter.apply('heartbeat', heartbeatSignature)
-  }
-  const modifiedMessages = messages.map((message) => {
-    const { payload } = message
-    const { command, data } = builder.decode(payload)
-    const modifiedData = ioFilter.apply(command, data)
-    const cleanModifiedData = _cleanForignFields(
-      modifiedData,
-      command,
+export function handleBufferMessage() {
+  return (stream$) =>
+    stream$.pipe(
+      map(function decomposeEmbeddedMessages(embeddedMessages) {
+        return decompose.withBufferPayload(embeddedMessages)
+      }),
+      filter(function heartbeat(messages) {
+        const [firstMessage] = messages
+        const heartbeatSignature = Buffer.from(
+          firstMessage.payload.slice(0, 4),
+        ).toString()
+        if (
+          messages.length === 1 &&
+          isHeartbeat(heartbeatSignature)
+        ) {
+          log('buffer:heartbeat', heartbeatSignature)
+          ioFilter
+            .apply('heartbeat', heartbeatSignature)
+            .subscribe((value) => stream$.complete(value))
+          return false
+        }
+        return true
+      }),
+      mergeMap(function transformMessages(message) {
+        const { payload } = message
+        const { command, data } = builder.decode(payload)
+        return ioFilter.apply(command, data).pipe(
+          map((modifiedData) => {
+            const cleanModifiedData = _cleanForignFields(
+              modifiedData,
+              command,
+            )
+            const inputPayload = builder.encode(
+              command,
+              cleanModifiedData,
+            )
+            log('buffer:decomposed', command, data)
+            return compose.withBufferPayload(inputPayload)
+          }),
+        )
+      }),
+      map(function combineMessages(modifiedMessages) {
+        return Buffer.concat(modifiedMessages)
+      }),
     )
-    const inputPayload = builder.encode(command, cleanModifiedData)
-    log('buffer:decomposed', command, data)
-    return compose.withBufferPayload(inputPayload)
-  })
-
-  return Buffer.concat(modifiedMessages)
 }
 
 /**
