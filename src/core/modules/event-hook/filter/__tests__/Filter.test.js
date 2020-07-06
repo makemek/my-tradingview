@@ -1,45 +1,45 @@
 import Filter from '../Filter'
 
-describe.skip('Filter', () => {
+describe('Filter', () => {
   describe('#bind', () => {
-    describe('bind event to a new observer', () => {
-      it('should put expected event name and callback in observers', () => {
+    describe('bind event to a new eventOperator', () => {
+      it('should put expected event name and operator in eventOperators', () => {
         const filter = new Filter()
-        const callback1 = () => 'callback1'
-        const callback2 = () => 'callback2'
-        const callback3 = () => 'callback3'
+        const operator1 = () => 'rxjs custom operator1'
+        const operator2 = () => 'rxjs custom operator2'
+        const operator3 = () => 'rxjs custom operator3'
 
-        filter.bind('event1', callback1)
-        filter.bind('event2', callback2)
-        filter.bind('event3', callback3)
+        filter.bind('event1', operator1)
+        filter.bind('event2', operator2)
+        filter.bind('event3', operator3)
 
-        expect(filter.observers).toEqual({
-          event1: [callback1],
-          event2: [callback2],
-          event3: [callback3],
+        expect(filter.eventOperators).toEqual({
+          event1: [operator1],
+          event2: [operator2],
+          event3: [operator3],
         })
       })
     })
 
-    describe('bind event to an existing observer', () => {
-      it('should append observer', () => {
+    describe('bind event to an existing eventOperator', () => {
+      it('should append eventOperator', () => {
         const filter = new Filter()
         const exsistingCallback = () => 'existingCallback'
         const newCallback = () => 'newCallback'
-        filter.observers = {
+        filter.eventOperators = {
           existingEvent: [exsistingCallback],
         }
 
         filter.bind('existingEvent', newCallback)
 
-        expect(filter.observers).toEqual({
+        expect(filter.eventOperators).toEqual({
           existingEvent: [exsistingCallback, newCallback],
         })
       })
     })
   })
 
-  describe('#apply', () => {
+  describe.skip('#apply', () => {
     describe('no observer', () => {
       it('should return the same message as passed in the parameter', () => {
         const filter = new Filter()
