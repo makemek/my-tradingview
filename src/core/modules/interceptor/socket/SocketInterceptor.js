@@ -17,8 +17,18 @@ export default class SocketInterceptor extends WebSocket {
       this._wrapOnReceiveMessage(this.onmessage)
     }
     log('send', message)
-    this._filter.apply(SocketInterceptor.SOCKET_SEND, message)
-    super.send(message)
+    try {
+      // some commands don't match with command schema such as quote_add_symbols.
+      // When filtered, it sends to server with some fields missing.
+      // The server sent no response cause the app to hang.
+      // Filtering for sending messages won't be supported for now.
+      // const processedMessage = this._filter.apply(SocketInterceptor.SOCKET_SEND, message)
+      super.send(message)
+    } catch (error) {
+      // for any unhandled messages sent from tradingview's app
+      log('send:filter-error', error)
+      super.send(message)
+    }
   }
 
   receive(message) {
