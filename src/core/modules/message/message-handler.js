@@ -17,8 +17,8 @@ const commandConverter = new CommandFieldConverter(schema)
 
 export function routeMessage(stream$) {
   return stream$.pipe(
-    mergeMap(({ type, payload }) => {
-      if (typeof type === 'string') {
+    mergeMap(({ payload }) => {
+      if (typeof payload === 'string') {
         return handleStringMessage(payload, stream$)
       }
       return handleBufferMessage(payload, stream$)
@@ -78,9 +78,6 @@ export function handleStringMessage(rawMessage, stream$) {
         }),
       )
     }),
-    map(function combineMessages(modifiedMessages) {
-      return modifiedMessages.join('')
-    }),
   )
 }
 
@@ -120,9 +117,6 @@ export function handleBufferMessage(rawMessage, stream$) {
           return compose.withBufferPayload(inputPayload)
         }),
       )
-    }),
-    map(function combineMessages(modifiedMessages) {
-      return Buffer.concat(modifiedMessages)
     }),
   )
 }
