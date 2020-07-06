@@ -46,10 +46,8 @@ export default class SocketInterceptor extends WebSocket {
 
   _wrapOnReceiveMessage(functionToWrap) {
     this.onmessage = (message) => {
-      // console.log('msg', message)
       const stream$ = this.receive(message)
       stream$.subscribe((modifiedData) => {
-        // console.log('mod', modifiedData)
         functionToWrap(modifiedData)
       })
     }
