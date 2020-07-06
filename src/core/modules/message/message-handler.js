@@ -60,7 +60,7 @@ export function handleStringMessage(rawMessage, stream$) {
         data,
       )
       return ioFilter.apply(command, commandFields).pipe(
-        map((modifiedData) => {
+        map(({ payload: modifiedData }) => {
           const cleanModifiedData = _cleanForignFields(
             modifiedData,
             command,
@@ -107,7 +107,7 @@ export function handleBufferMessage(rawMessage, stream$) {
       const { payload } = message
       const { command, data } = builder.decode(payload)
       return ioFilter.apply(command, data).pipe(
-        map((modifiedData) => {
+        map(({ payload: modifiedData }) => {
           const cleanModifiedData = _cleanForignFields(
             modifiedData,
             command,
