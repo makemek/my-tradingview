@@ -34,7 +34,7 @@ export function handleStringMessage(rawMessage, stream$) {
     filter(function heartbeatWithoutSigature([firstMessage]) {
       const heartbeatWithoutSigature = !firstMessage.signature
       if (heartbeatWithoutSigature) {
-        stream$.complete(firstMessage.payload)
+        // stream$.next(firstMessage.payload)
         return false
       }
       return true
@@ -46,7 +46,7 @@ export function handleStringMessage(rawMessage, stream$) {
         log('string:heartbeat', heartbeatSignature)
         ioFilter
           .apply('heartbeat', heartbeatSignature)
-          .subscribe((value) => stream$.complete(value))
+          .subscribe((value) => console.log(value))
         return false
       }
 
@@ -95,7 +95,7 @@ export function handleBufferMessage(rawMessage, stream$) {
         log('buffer:heartbeat', heartbeatSignature)
         ioFilter
           .apply('heartbeat', heartbeatSignature)
-          .subscribe((value) => stream$.complete(value))
+          .subscribe((value) => console.log(value))
         return false
       }
       return true
