@@ -2,7 +2,7 @@ import { Buffer } from 'buffer'
 import { logger } from 'lib/logger'
 import { ioFilter } from 'core/modules/common/helpers'
 import pick from 'lodash/pick'
-import { of } from 'rxjs'
+import { of, forkJoin } from 'rxjs'
 import { map, mergeMap, filter } from 'rxjs/operators'
 
 import { compose, decompose } from './payload'
@@ -26,7 +26,7 @@ export function routeMessage(stream$) {
   )
 }
 
-export function handleStringMessage(rawMessage, stream$) {
+export function handleStringMessage(rawMessage) {
   return of(rawMessage).pipe(
     map(function decomposeEmbeddedMessages(embeddedMessages) {
       return decompose.withStringPayload(embeddedMessages)
@@ -46,42 +46,49 @@ export function handleStringMessage(rawMessage, stream$) {
         log('string:heartbeat', heartbeatSignature)
         ioFilter
           .apply('heartbeat', heartbeatSignature)
-          .subscribe((value) => console.log(value))
+          .subscribe(() => {})
         return false
       }
 
       return true
     }),
-    mergeMap(function transformMessages([message]) {
-      const { payload } = message
-      const { m: command, p: data } = JSON.parse(payload)
-      const commandFields = commandConverter.toCommandFields(
-        command,
-        data,
-      )
-      return ioFilter.apply(command, commandFields).pipe(
-        map(({ payload: modifiedData }) => {
-          const cleanModifiedData = _cleanForignFields(
-            modifiedData,
+    mergeMap(function transformMessages(messages) {
+      return forkJoin(
+        messages.map((message) => {
+          const { payload } = message
+          const { m: command, p: data } = JSON.parse(payload)
+          const commandFields = commandConverter.toCommandFields(
             command,
+            data,
           )
-          const fieldArray = commandConverter.toFieldArray(
-            command,
-            cleanModifiedData,
+          return ioFilter.apply(command, commandFields).pipe(
+            map(({ payload: modifiedData }) => {
+              const cleanModifiedData = _cleanForignFields(
+                modifiedData,
+                command,
+              )
+              const fieldArray = commandConverter.toFieldArray(
+                command,
+                cleanModifiedData,
+              )
+              const inputPayload = JSON.stringify({
+                m: command,
+                p: fieldArray,
+              })
+              log('string:decomposed', command, data)
+              return compose.withStringPayload(inputPayload)
+            }),
           )
-          const inputPayload = JSON.stringify({
-            m: command,
-            p: fieldArray,
-          })
-          log('string:decomposed', command, data)
-          return compose.withStringPayload(inputPayload)
         }),
       )
+    }),
+    map(function combineMessages(messages) {
+      return messages.join('')
     }),
   )
 }
 
-export function handleBufferMessage(rawMessage, stream$) {
+export function handleBufferMessage(rawMessage) {
   return of(rawMessage).pipe(
     map(function decomposeEmbeddedMessages(embeddedMessages) {
       return decompose.withBufferPayload(embeddedMessages)
@@ -95,29 +102,36 @@ export function handleBufferMessage(rawMessage, stream$) {
         log('buffer:heartbeat', heartbeatSignature)
         ioFilter
           .apply('heartbeat', heartbeatSignature)
-          .subscribe((value) => console.log(value))
+          .subscribe(() => {})
         return false
       }
       return true
     }),
-    mergeMap(function transformMessages([message]) {
-      const { payload } = message
-      const { command, data } = builder.decode(payload)
-      return ioFilter.apply(command, data).pipe(
-        map(({ payload: modifiedData }) => {
-          const cleanModifiedData = _cleanForignFields(
-            modifiedData,
-            command,
+    mergeMap(function transformMessages(messages) {
+      return forkJoin(
+        messages.map((message) => {
+          const { payload } = message
+          const { command, data } = builder.decode(payload)
+          return ioFilter.apply(command, data).pipe(
+            map(({ payload: modifiedData }) => {
+              const cleanModifiedData = _cleanForignFields(
+                modifiedData,
+                command,
+              )
+              const inputPayload = builder.encode(
+                command,
+                cleanModifiedData,
+              )
+              log('buffer:decomposed', command, data)
+              return compose.withBufferPayload(inputPayload)
+            }),
           )
-          const inputPayload = builder.encode(
-            command,
-            cleanModifiedData,
-          )
-          log('buffer:decomposed', command, data)
-          return compose.withBufferPayload(inputPayload)
         }),
       )
-    }, 1),
+    }),
+    map(function combineMessages(messages) {
+      return Buffer.concat(messages)
+    }),
   )
 }
 
