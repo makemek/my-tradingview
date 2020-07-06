@@ -100,7 +100,7 @@ export function handleBufferMessage(rawMessage, stream$) {
       }
       return true
     }),
-    mergeMap(function transformMessages(message) {
+    mergeMap(function transformMessages([message]) {
       const { payload } = message
       const { command, data } = builder.decode(payload)
       return ioFilter.apply(command, data).pipe(
@@ -117,7 +117,7 @@ export function handleBufferMessage(rawMessage, stream$) {
           return compose.withBufferPayload(inputPayload)
         }),
       )
-    }),
+    }, 1),
   )
 }
 
