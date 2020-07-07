@@ -32,27 +32,16 @@ export function handleStringMessage(rawMessage) {
       return decompose.withStringPayload(embeddedMessages)
     }),
     mergeMap(function transformMessages(messages) {
+      const heartbeat$ = maybeHeartbeat(messages)
+      if (heartbeat$) {
+        return heartbeat$.pipe(
+          map(({ payload }) => [compose.withStringPayload(payload)]),
+        )
+      }
+
       return forkJoin(
         messages.map((message) => {
-          const { signature, payload } = message
-          const maybeHeartbeat = payload.slice(0, 4)
-          const maybeHeartbeatNoSignature =
-            !signature && messages.length === 1
-
-          if (
-            isHeartbeat(maybeHeartbeat) ||
-            maybeHeartbeatNoSignature
-          ) {
-            log('string:heartbeat', maybeHeartbeat)
-            return ioFilter
-              .apply('heartbeat', maybeHeartbeat)
-              .pipe(
-                map(({ payload }) =>
-                  compose.withStringPayload(payload),
-                ),
-              )
-          }
-
+          const { payload } = message
           const { m: command, p: data } = JSON.parse(payload)
           const commandFields = commandConverter.toCommandFields(
             command,
@@ -91,29 +80,18 @@ export function handleBufferMessage(rawMessage) {
       return decompose.withBufferPayload(embeddedMessages)
     }),
     mergeMap(function transformMessages(messages) {
+      const heartbeat$ = maybeHeartbeat(messages)
+      if (heartbeat$) {
+        return heartbeat$.pipe(
+          map(({ payload }) => [
+            compose.withBufferPayload(Buffer.from(payload)),
+          ]),
+        )
+      }
+
       return forkJoin(
         messages.map((message) => {
-          const { signature, payload } = message
-          const maybeHeartbeat = Buffer.from(
-            payload.slice(0, 4),
-          ).toString()
-          const maybeHeartbeatNoSignature =
-            !signature && messages.length === 1
-
-          if (
-            isHeartbeat(maybeHeartbeat) ||
-            maybeHeartbeatNoSignature
-          ) {
-            log('string:heartbeat', maybeHeartbeat)
-            return ioFilter
-              .apply('heartbeat', maybeHeartbeat)
-              .pipe(
-                map(({ payload }) =>
-                  compose.withBufferPayload(Buffer.from(payload)),
-                ),
-              )
-          }
-
+          const { payload } = message
           const { command, data } = builder.decode(payload)
           return ioFilter.apply(command, data).pipe(
             map(({ payload: modifiedData }) => {
@@ -136,6 +114,29 @@ export function handleBufferMessage(rawMessage) {
       return Buffer.concat(messages)
     }),
   )
+}
+
+/**
+ * Check for potential messages that could be a heartbeat message format ~h~<number>
+ * Command protobuf can't decode it because it doesn't exist in the schema.
+ * It has to be processed separately
+ *
+ * @param  {[string[] | Buffer[]]} decomposedMessages decomposed messages
+ * @return {[Observable | null]} If heartbeat return observable. Otherwise, null
+ */
+function maybeHeartbeat(decomposedMessages) {
+  // all signatures are always in the first message as of now
+  const [{ signature, payload }] = decomposedMessages
+  const heartbeatMessage = payload.toString().slice(0, 4)
+  const maybeHeartbeatNoSignature =
+    !signature && decomposedMessages.length === 1
+
+  if (isHeartbeat(heartbeatMessage) || maybeHeartbeatNoSignature) {
+    log('string:heartbeat', heartbeatMessage)
+    return ioFilter.apply('heartbeat', heartbeatMessage)
+  }
+
+  return null
 }
 
 /**
