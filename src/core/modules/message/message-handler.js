@@ -121,7 +121,7 @@ export function handleBufferMessage(rawMessage) {
  * Command protobuf can't decode it because it doesn't exist in the schema.
  * It has to be processed separately
  *
- * @param  {[string[] | Buffer[]]} decomposedMessages decomposed messages
+ * @param  {[Object[]} decomposedMessages decomposed messages
  * @return {[Observable | null]} If heartbeat return observable. Otherwise, null
  */
 export function _maybeHeartbeat(decomposedMessages) {
