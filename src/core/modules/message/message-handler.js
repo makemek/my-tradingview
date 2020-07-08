@@ -32,7 +32,7 @@ export function handleStringMessage(rawMessage) {
       return decompose.withStringPayload(embeddedMessages)
     }),
     mergeMap(function transformMessages(messages) {
-      const heartbeat$ = maybeHeartbeat(messages)
+      const heartbeat$ = _maybeHeartbeat(messages)
       if (isObservable(heartbeat$)) {
         return heartbeat$.pipe(
           map(({ payload }) => [compose.withStringPayload(payload)]),
@@ -80,7 +80,7 @@ export function handleBufferMessage(rawMessage) {
       return decompose.withBufferPayload(embeddedMessages)
     }),
     mergeMap(function transformMessages(messages) {
-      const heartbeat$ = maybeHeartbeat(messages)
+      const heartbeat$ = _maybeHeartbeat(messages)
       if (isObservable(heartbeat$)) {
         return heartbeat$.pipe(
           map(({ payload }) => [
@@ -124,7 +124,7 @@ export function handleBufferMessage(rawMessage) {
  * @param  {[string[] | Buffer[]]} decomposedMessages decomposed messages
  * @return {[Observable | null]} If heartbeat return observable. Otherwise, null
  */
-export function maybeHeartbeat(decomposedMessages) {
+export function _maybeHeartbeat(decomposedMessages) {
   // all signatures are always in the first message as of now
   const [{ signature, payload }] = decomposedMessages
   const heartbeatMessage = payload.toString()
