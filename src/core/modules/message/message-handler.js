@@ -124,10 +124,10 @@ export function handleBufferMessage(rawMessage) {
  * @param  {[string[] | Buffer[]]} decomposedMessages decomposed messages
  * @return {[Observable | null]} If heartbeat return observable. Otherwise, null
  */
-function maybeHeartbeat(decomposedMessages) {
+export function maybeHeartbeat(decomposedMessages) {
   // all signatures are always in the first message as of now
   const [{ signature, payload }] = decomposedMessages
-  const heartbeatMessage = payload.toString().slice(0, 4)
+  const heartbeatMessage = payload.toString()
   const maybeHeartbeatNoSignature =
     !signature && decomposedMessages.length === 1
 
