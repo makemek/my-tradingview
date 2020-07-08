@@ -2,7 +2,7 @@ import { Buffer } from 'buffer'
 import { logger } from 'lib/logger'
 import { ioFilter } from 'core/modules/common/helpers'
 import pick from 'lodash/pick'
-import { of, forkJoin } from 'rxjs'
+import { of, forkJoin, isObservable } from 'rxjs'
 import { map, mergeMap } from 'rxjs/operators'
 
 import { compose, decompose } from './payload'
@@ -33,7 +33,7 @@ export function handleStringMessage(rawMessage) {
     }),
     mergeMap(function transformMessages(messages) {
       const heartbeat$ = maybeHeartbeat(messages)
-      if (heartbeat$) {
+      if (isObservable(heartbeat$)) {
         return heartbeat$.pipe(
           map(({ payload }) => [compose.withStringPayload(payload)]),
         )
@@ -81,7 +81,7 @@ export function handleBufferMessage(rawMessage) {
     }),
     mergeMap(function transformMessages(messages) {
       const heartbeat$ = maybeHeartbeat(messages)
-      if (heartbeat$) {
+      if (isObservable(heartbeat$)) {
         return heartbeat$.pipe(
           map(({ payload }) => [
             compose.withBufferPayload(Buffer.from(payload)),
