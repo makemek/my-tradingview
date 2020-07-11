@@ -127,7 +127,7 @@ export function handleBufferMessage(rawMessage) {
 export function _maybeHeartbeat(decomposedMessages) {
   // all signatures are always in the first message as of now
   const [{ signature, payload }] = decomposedMessages
-  const heartbeatMessage = payload.toString()
+  const heartbeatMessage = Buffer.from(payload).toString()
   const maybeHeartbeatNoSignature =
     !signature && decomposedMessages.length === 1
 
