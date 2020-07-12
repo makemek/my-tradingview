@@ -1,22 +1,27 @@
-import { isObservable } from 'rxjs'
+import { TestScheduler } from 'rxjs/testing'
 
 import { _maybeHeartbeat } from '../message-handler'
 
 describe('#_maybeHeartbeat', () => {
-  it('is heartbeat string message should return observable', (done) => {
-    const input = [{ signature: '~m~', payload: '~h~999' }]
-    const expectedOutput = { type: 'heartbeat', payload: '~h~999' }
+  let testScheduler
 
-    const result$ = _maybeHeartbeat(input)
-
-    expect(isObservable(result$)).toBe(true)
-    result$.subscribe((result) => {
-      expect(result).toEqual(expectedOutput)
-      done()
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected)
     })
   })
 
-  it('is heartbeat buffer message should return observable', (done) => {
+  it('is heartbeat string message should return observable', () => {
+    const input = [{ signature: '~m~', payload: '~h~999' }]
+    const expectedOutput = { type: 'heartbeat', payload: '~h~999' }
+
+    testScheduler.run(({ expectObservable }) => {
+      const result$ = _maybeHeartbeat(input)
+      expectObservable(result$).toBe('(a|)', { a: expectedOutput })
+    })
+  })
+
+  it('is heartbeat buffer message should return observable', () => {
     const input = [
       {
         signature: '~m~',
@@ -25,12 +30,9 @@ describe('#_maybeHeartbeat', () => {
     ]
     const expectedOutput = { type: 'heartbeat', payload: '~h~999' }
 
-    const result$ = _maybeHeartbeat(input)
-
-    expect(isObservable(result$)).toBe(true)
-    result$.subscribe((result) => {
-      expect(result).toEqual(expectedOutput)
-      done()
+    testScheduler.run(({ expectObservable }) => {
+      const result$ = _maybeHeartbeat(input)
+      expectObservable(result$).toBe('(a|)', { a: expectedOutput })
     })
   })
 
