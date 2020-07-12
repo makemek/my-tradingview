@@ -1,3 +1,6 @@
+import { map } from 'rxjs/operators'
+import { TestScheduler } from 'rxjs/testing'
+
 import Filter from '../Filter'
 
 describe('Filter', () => {
@@ -39,60 +42,64 @@ describe('Filter', () => {
     })
   })
 
-  describe.skip('#apply', () => {
+  describe('#apply', () => {
+    let testScheduler
+
+    beforeEach(() => {
+      testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected)
+      })
+    })
+
     describe('no observer', () => {
       it('should return the same message as passed in the parameter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
+        const expectedMessage = {
+          action: 'anEvent',
+          payload: inputMessage,
+        }
 
-        const appliedMessage = filter.apply('anEvent', inputMessage)
-
-        expect(appliedMessage).toEqual(inputMessage)
+        testScheduler.run(({ expectObservable }) => {
+          const stream$ = filter.apply('anEvent', inputMessage)
+          expectObservable(stream$).toBe('(a|)', {
+            a: expectedMessage,
+          })
+        })
       })
     })
 
     describe('has observer and event match with what observer subscribe', () => {
       it('should call expected observer with expected message', () => {
         const filter = new Filter()
-        const message = 'message2Apply'
-        const expectedObserverMessage = 'appliedMessage'
-        const observerCallback = jest
-          .fn()
-          .mockReturnValue(expectedObserverMessage)
-        filter.observers = {
+        const operator = (stream$) =>
+          stream$.pipe(
+            map(() => ({
+              action: 'shouldTriggerEvent',
+              payload: 'appliedMessage',
+            })),
+          )
+        const expectedOutput = {
+          action: 'shouldTriggerEvent',
+          payload: 'appliedMessage',
+        }
+        filter.eventOperators = {
           shouldNotTriggerEvent: [
             () => 'shouldNotTriggerThisCallback',
           ],
-          shouldTriggerEvent: [observerCallback],
+          shouldTriggerEvent: [operator],
         }
 
-        const appliedMessage = filter.apply(
-          'shouldTriggerEvent',
-          message,
-        )
+        testScheduler.run(({ expectObservable }) => {
+          const stream$ = filter.apply(
+            'shouldTriggerEvent',
+            'message2Apply',
+          )
 
-        expect(appliedMessage).toEqual(expectedObserverMessage)
-        expect(observerCallback.mock.calls.length).toBe(1)
-        expect(observerCallback).toBeCalledWith(message)
-      })
-
-      it('should pass processed value to next observer', () => {
-        const filter = new Filter()
-        const message = 'message2Apply'
-        const observer1 = (msg) => msg
-        const observer2 = () => {} // only subscribes, and not return any data
-        const observer3 = (msg) => msg
-
-        filter.observers = {
-          shouldTriggerEvent: [observer1, observer2, observer3],
-        }
-
-        const appliedMessage = filter.apply(
-          'shouldTriggerEvent',
-          message,
-        )
-
-        expect(appliedMessage).toEqual(message)
+          expectObservable(stream$).toBe('(a|)', {
+            a: expectedOutput,
+          })
+        })
       })
     })
 
@@ -100,18 +107,26 @@ describe('Filter', () => {
       it('should return the same message as passsed in the parameter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
+        const expectedOutput = {
+          action: 'nonExistingEvent',
+          payload: inputMessage,
+        }
         filter.observers = {
           event1: [() => 'shouldNotTriggerThisCallback'],
           event2: [() => 'shouldNotTriggerThisCallback'],
           event3: [() => 'shouldNotTriggerThisCallback'],
         }
 
-        const appliedMessage = filter.apply(
-          'nonExistingEvent',
-          inputMessage,
-        )
+        testScheduler.run(({ expectObservable }) => {
+          const stream$ = filter.apply(
+            'nonExistingEvent',
+            inputMessage,
+          )
 
-        expect(appliedMessage).toEqual(inputMessage)
+          expectObservable(stream$).toBe('(a|)', {
+            a: expectedOutput,
+          })
+        })
       })
     })
   })
