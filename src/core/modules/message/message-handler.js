@@ -17,11 +17,11 @@ const commandConverter = new CommandFieldConverter(schema)
 
 export function routeMessage(stream$) {
   return stream$.pipe(
-    mergeMap(({ payload }) => {
-      if (typeof payload === 'string') {
-        return handleStringMessage(payload, stream$)
+    mergeMap((message) => {
+      if (typeof message === 'string') {
+        return handleStringMessage(message)
       }
-      return handleBufferMessage(payload, stream$)
+      return handleBufferMessage(message)
     }),
   )
 }
@@ -35,7 +35,9 @@ export function handleStringMessage(rawMessage) {
       const heartbeat$ = _maybeHeartbeat(messages)
       if (isObservable(heartbeat$)) {
         return heartbeat$.pipe(
-          map(({ payload }) => [compose.withStringPayload(payload)]),
+          map((transformedMessage) => [
+            compose.withStringPayload(transformedMessage),
+          ]),
         )
       }
 
@@ -48,7 +50,7 @@ export function handleStringMessage(rawMessage) {
             data,
           )
           return ioFilter.apply(command, commandFields).pipe(
-            map(({ payload: modifiedData }) => {
+            map((modifiedData) => {
               const cleanModifiedData = _cleanForignFields(
                 modifiedData,
                 command,
@@ -83,8 +85,10 @@ export function handleBufferMessage(rawMessage) {
       const heartbeat$ = _maybeHeartbeat(messages)
       if (isObservable(heartbeat$)) {
         return heartbeat$.pipe(
-          map(({ payload }) => [
-            compose.withBufferPayload(Buffer.from(payload)),
+          map((transformedMessage) => [
+            compose.withBufferPayload(
+              Buffer.from(transformedMessage),
+            ),
           ]),
         )
       }
@@ -94,7 +98,7 @@ export function handleBufferMessage(rawMessage) {
           const { payload } = message
           const { command, data } = builder.decode(payload)
           return ioFilter.apply(command, data).pipe(
-            map(({ payload: modifiedData }) => {
+            map((modifiedData) => {
               const cleanModifiedData = _cleanForignFields(
                 modifiedData,
                 command,

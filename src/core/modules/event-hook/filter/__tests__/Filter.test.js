@@ -55,11 +55,7 @@ describe('Filter', () => {
       it('should return the same message as passed in the parameter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
-        const expectedMessage = {
-          action: 'anEvent',
-          payload: inputMessage,
-        }
-
+        const expectedMessage = inputMessage
         testScheduler.run(({ expectObservable }) => {
           const stream$ = filter.apply('anEvent', inputMessage)
           expectObservable(stream$).toBe('(a|)', {
@@ -107,11 +103,8 @@ describe('Filter', () => {
       it('should return the same message as passsed in the parameter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
-        const expectedOutput = {
-          action: 'nonExistingEvent',
-          payload: inputMessage,
-        }
-        filter.observers = {
+        const expectedOutput = inputMessage
+        filter.eventOperators = {
           event1: [() => 'shouldNotTriggerThisCallback'],
           event2: [() => 'shouldNotTriggerThisCallback'],
           event3: [() => 'shouldNotTriggerThisCallback'],

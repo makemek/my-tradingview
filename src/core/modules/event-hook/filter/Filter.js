@@ -14,10 +14,7 @@ class Filter {
   }
 
   apply(eventName, message) {
-    const stream$ = of({
-      action: eventName,
-      payload: message,
-    })
+    const stream$ = of(message)
     const operators = this.eventOperators[eventName]
 
     if (!operators) {

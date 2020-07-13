@@ -13,7 +13,7 @@ describe('#_maybeHeartbeat', () => {
 
   it('is heartbeat string message should return observable', () => {
     const input = [{ signature: '~m~', payload: '~h~999' }]
-    const expectedOutput = { action: 'heartbeat', payload: '~h~999' }
+    const expectedOutput = '~h~999'
 
     testScheduler.run(({ expectObservable }) => {
       const result$ = _maybeHeartbeat(input)
@@ -28,7 +28,7 @@ describe('#_maybeHeartbeat', () => {
         payload: new Uint8Array(Buffer.from('~h~999')),
       },
     ]
-    const expectedOutput = { action: 'heartbeat', payload: '~h~999' }
+    const expectedOutput = '~h~999'
 
     testScheduler.run(({ expectObservable }) => {
       const result$ = _maybeHeartbeat(input)
