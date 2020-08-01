@@ -7,8 +7,8 @@
     "start": "webpack --watch",
     "build": "NODE_ENV=production webpack",
     "test": "jest",
-    "pretty": "prettier --write 'src/**/*.js'",
-    "lint": "eslint --fix src/**/*.js",
+    "pretty": "prettier-eslint --write \"src/**/*.js\"",
+    "lint": "eslint src/**/*.js",
     "lint:staged": "lint-staged"
   },
   "husky": {
@@ -43,11 +43,11 @@
     "debug": "4.1.1",
     "eslint": "5.16.0",
     "eslint-config-prettier": "4.1.0",
-    "eslint-plugin-prettier": "3.0.1",
     "husky": "1.3.1",
     "jest": "24.7.1",
     "lint-staged": "8.1.5",
     "prettier": "1.16.4",
+    "prettier-eslint-cli": "5.0.0",
     "pretty-quick": "1.10.0",
     "webpack": "4.29.6",
     "webpack-cli": "3.3.0"

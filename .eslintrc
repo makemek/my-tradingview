@@ -2,7 +2,6 @@
   "parser": "babel-eslint",
   "extends": [
     "eslint:recommended",
-    "prettier"
   ],
   "parserOptions": {
     "sourceType": "module"
@@ -16,9 +15,8 @@
     "es6": true,
     "browser": true
   },
-  "plugins": ["prettier"],
   "rules": {
     "no-console": ["error", { "allow": ["info", "error"] }],
-    "prettier/prettier": "error"
+    "semi": ["error", "never"],
   }
 }
