@@ -1,7 +1,17 @@
-import createStudyTransformer from '../create-study-transformer'
+import { TestScheduler } from 'rxjs/testing'
+
+import { _handleCreateStudy } from '../create-study-transformer'
 
 describe('modules/plugins/create-study-transformer', () => {
-  describe('#default', () => {
+  describe('#_handleCreateStudy', () => {
+    let testScheduler
+
+    beforeEach(() => {
+      testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expect.objectContaining(expected))
+      })
+    })
+
     describe('buffer input', () => {
       it('should output expected object', () => {
         // can't figure out buffer format yet.
@@ -17,20 +27,21 @@ describe('modules/plugins/create-study-transformer', () => {
             ),
           },
         }
-        const outputSpy = jest.fn()
-        const bindFunc = (event, callback) =>
-          outputSpy(callback(data))
-        const hook = { bind: bindFunc, EVENT: {} }
-
-        createStudyTransformer()(hook)
-
         const expectOutput = {
           $inputsDecoded: {
             inputs: studyConfig,
           },
           ...data,
         }
-        expect(outputSpy.mock.calls[0][0]).toEqual(expectOutput)
+
+        testScheduler.run((helpers) => {
+          const { cold, expectObservable } = helpers
+          const stream$ = cold('a|', { a: data })
+
+          const result$ = _handleCreateStudy(stream$)
+
+          expectObservable(result$).toBe('a', { a: expectOutput })
+        })
       })
     })
     describe('string input', () => {
@@ -40,20 +51,21 @@ describe('modules/plugins/create-study-transformer', () => {
           extra: true,
           inputs: studyConfig,
         }
-        const outputSpy = jest.fn()
-        const bindFunc = (event, callback) =>
-          outputSpy(callback(data))
-        const hook = { bind: bindFunc, EVENT: {} }
-
-        createStudyTransformer()(hook)
-
         const expectOutput = {
           $inputsDecoded: {
             inputs: studyConfig,
           },
           ...data,
         }
-        expect(outputSpy.mock.calls[0][0]).toEqual(expectOutput)
+
+        testScheduler.run((helpers) => {
+          const { cold, expectObservable } = helpers
+          const stream$ = cold('a|', { a: data })
+
+          const result$ = _handleCreateStudy(stream$)
+
+          expectObservable(result$).toBe('a', { a: expectOutput })
+        })
       })
     })
   })

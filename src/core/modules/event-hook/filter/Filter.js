@@ -1,32 +1,26 @@
-import defaultTo from 'lodash/defaultTo'
+import { of } from 'rxjs'
 
 class Filter {
-  observers = {}
+  eventOperators = {}
 
-  bind(eventName, callback) {
-    const subscribers = this.observers[eventName]
-    if (!subscribers) {
-      this.observers[eventName] = [callback]
+  bind(eventName, newOperator) {
+    const operators = this.eventOperators[eventName]
+    if (!operators) {
+      this.eventOperators[eventName] = [newOperator]
     } else {
-      subscribers.push(callback)
-      this.observers[eventName] = subscribers
+      operators.push(newOperator)
+      this.eventOperators[eventName] = operators
     }
   }
 
   apply(eventName, message) {
-    const observerCallbacks = this.observers[eventName]
-    if (observerCallbacks === undefined) {
-      return message
-    }
+    const stream$ = of(message)
+    const operators = this.eventOperators[eventName]
 
-    return observerCallbacks.reduce(
-      (accumulateMessage, currentObserver) =>
-        defaultTo(
-          currentObserver(accumulateMessage),
-          accumulateMessage,
-        ),
-      message,
-    )
+    if (!operators) {
+      return stream$
+    }
+    return stream$.pipe(...operators)
   }
 }
 

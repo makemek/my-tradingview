@@ -1,4 +1,5 @@
 import { logger } from 'lib/logger'
+import { map } from 'rxjs/operators'
 
 const log = logger('core:interceptor')
 
@@ -33,17 +34,22 @@ export default class SocketInterceptor extends WebSocket {
 
   receive(message) {
     log('receive', message.data)
-    const processedMessage = this._filter.apply(
+    const stream$ = this._filter.apply(
       SocketInterceptor.SOCKET_RECEIVE,
       message.data,
     )
-    return { ...message, data: processedMessage }
+    return stream$.pipe(
+      // filter(({ type }) => type === SocketInterceptor.SOCKET_RECEIVE),
+      map((data) => ({ ...message, data })),
+    )
   }
 
   _wrapOnReceiveMessage(functionToWrap) {
     this.onmessage = (message) => {
-      const processedMessage = this.receive(message)
-      functionToWrap(processedMessage)
+      const stream$ = this.receive(message)
+      stream$.subscribe((modifiedData) => {
+        functionToWrap(modifiedData)
+      })
     }
     this._alreadyWrapReceiveEvent = true
   }

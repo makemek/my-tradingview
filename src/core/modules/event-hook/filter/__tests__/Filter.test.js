@@ -1,38 +1,41 @@
+import { map } from 'rxjs/operators'
+import { TestScheduler } from 'rxjs/testing'
+
 import Filter from '../Filter'
 
 describe('Filter', () => {
   describe('#bind', () => {
-    describe('bind event to a new observer', () => {
-      it('should put expected event name and callback in observers', () => {
+    describe('bind event to a new eventOperator', () => {
+      it('should put expected event name and operator in eventOperators', () => {
         const filter = new Filter()
-        const callback1 = () => 'callback1'
-        const callback2 = () => 'callback2'
-        const callback3 = () => 'callback3'
+        const operator1 = () => 'rxjs custom operator1'
+        const operator2 = () => 'rxjs custom operator2'
+        const operator3 = () => 'rxjs custom operator3'
 
-        filter.bind('event1', callback1)
-        filter.bind('event2', callback2)
-        filter.bind('event3', callback3)
+        filter.bind('event1', operator1)
+        filter.bind('event2', operator2)
+        filter.bind('event3', operator3)
 
-        expect(filter.observers).toEqual({
-          event1: [callback1],
-          event2: [callback2],
-          event3: [callback3],
+        expect(filter.eventOperators).toEqual({
+          event1: [operator1],
+          event2: [operator2],
+          event3: [operator3],
         })
       })
     })
 
-    describe('bind event to an existing observer', () => {
-      it('should append observer', () => {
+    describe('bind event to an existing eventOperator', () => {
+      it('should append eventOperator', () => {
         const filter = new Filter()
         const exsistingCallback = () => 'existingCallback'
         const newCallback = () => 'newCallback'
-        filter.observers = {
+        filter.eventOperators = {
           existingEvent: [exsistingCallback],
         }
 
         filter.bind('existingEvent', newCallback)
 
-        expect(filter.observers).toEqual({
+        expect(filter.eventOperators).toEqual({
           existingEvent: [exsistingCallback, newCallback],
         })
       })
@@ -40,59 +43,59 @@ describe('Filter', () => {
   })
 
   describe('#apply', () => {
+    let testScheduler
+
+    beforeEach(() => {
+      testScheduler = new TestScheduler((actual, expected) => {
+        expect(actual).toEqual(expected)
+      })
+    })
+
     describe('no observer', () => {
       it('should return the same message as passed in the parameter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
-
-        const appliedMessage = filter.apply('anEvent', inputMessage)
-
-        expect(appliedMessage).toEqual(inputMessage)
+        const expectedMessage = inputMessage
+        testScheduler.run(({ expectObservable }) => {
+          const stream$ = filter.apply('anEvent', inputMessage)
+          expectObservable(stream$).toBe('(a|)', {
+            a: expectedMessage,
+          })
+        })
       })
     })
 
     describe('has observer and event match with what observer subscribe', () => {
       it('should call expected observer with expected message', () => {
         const filter = new Filter()
-        const message = 'message2Apply'
-        const expectedObserverMessage = 'appliedMessage'
-        const observerCallback = jest
-          .fn()
-          .mockReturnValue(expectedObserverMessage)
-        filter.observers = {
+        const operator = (stream$) =>
+          stream$.pipe(
+            map(() => ({
+              action: 'shouldTriggerEvent',
+              payload: 'appliedMessage',
+            })),
+          )
+        const expectedOutput = {
+          action: 'shouldTriggerEvent',
+          payload: 'appliedMessage',
+        }
+        filter.eventOperators = {
           shouldNotTriggerEvent: [
             () => 'shouldNotTriggerThisCallback',
           ],
-          shouldTriggerEvent: [observerCallback],
+          shouldTriggerEvent: [operator],
         }
 
-        const appliedMessage = filter.apply(
-          'shouldTriggerEvent',
-          message,
-        )
+        testScheduler.run(({ expectObservable }) => {
+          const stream$ = filter.apply(
+            'shouldTriggerEvent',
+            'message2Apply',
+          )
 
-        expect(appliedMessage).toEqual(expectedObserverMessage)
-        expect(observerCallback.mock.calls.length).toBe(1)
-        expect(observerCallback).toBeCalledWith(message)
-      })
-
-      it('should pass processed value to next observer', () => {
-        const filter = new Filter()
-        const message = 'message2Apply'
-        const observer1 = (msg) => msg
-        const observer2 = () => {} // only subscribes, and not return any data
-        const observer3 = (msg) => msg
-
-        filter.observers = {
-          shouldTriggerEvent: [observer1, observer2, observer3],
-        }
-
-        const appliedMessage = filter.apply(
-          'shouldTriggerEvent',
-          message,
-        )
-
-        expect(appliedMessage).toEqual(message)
+          expectObservable(stream$).toBe('(a|)', {
+            a: expectedOutput,
+          })
+        })
       })
     })
 
@@ -100,18 +103,23 @@ describe('Filter', () => {
       it('should return the same message as passsed in the parameter', () => {
         const filter = new Filter()
         const inputMessage = 'inputMessage'
-        filter.observers = {
+        const expectedOutput = inputMessage
+        filter.eventOperators = {
           event1: [() => 'shouldNotTriggerThisCallback'],
           event2: [() => 'shouldNotTriggerThisCallback'],
           event3: [() => 'shouldNotTriggerThisCallback'],
         }
 
-        const appliedMessage = filter.apply(
-          'nonExistingEvent',
-          inputMessage,
-        )
+        testScheduler.run(({ expectObservable }) => {
+          const stream$ = filter.apply(
+            'nonExistingEvent',
+            inputMessage,
+          )
 
-        expect(appliedMessage).toEqual(inputMessage)
+          expectObservable(stream$).toBe('(a|)', {
+            a: expectedOutput,
+          })
+        })
       })
     })
   })
